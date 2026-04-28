@@ -5,36 +5,222 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#8b3a2a">
   <meta name="description" content="ZATY Planner — Franklin-style daily planning system">
-
+ 
   <!-- PWA -->
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ZATY">
-  <link rel="apple-touch-icon" href="/icon.svg">
-
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+ 
   <title>ZATY Planner</title>
   <link rel="stylesheet" href="styles.css">
+ 
+  <script src="data.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-<div class="app-shell">
-
-  <!-- Top bar -->
-  <header class="top-bar">
-    <div class="brand">
-      <span class="brand-name">ZATY Planner</span>
-      <span class="brand-sub">Daily Planning System</span>
-    </div>
-    <div class="top-actions">
-      <button class="install-btn" id="install-btn" aria-label="Install app">
-        &#8659; Install
-      </button>
-      <button class="icon-btn" id="print-btn" aria-label="Print day" title="Print">&#9113;</button>
-    </div>
-  </header>
-
-  <!-- Date navigation -->
+  <noscript>
+    <p>This planner requires JavaScript to save and manage your tasks.</p>
+  </noscript>
+ 
+  <div class="app-shell">
+ 
+    <!-- Top bar -->
+    <header class="top-bar">
+      <div class="brand">
+        <h1 class="brand-name">ZATY Planner</h1>
+        <span class="brand-sub">Daily Planning System</span>
+      </div>
+ 
+      <div class="top-actions" aria-label="App actions">
+        <button
+          type="button"
+          class="install-btn"
+          id="install-btn"
+          aria-label="Install ZATY Planner"
+          hidden
+        >
+          <span aria-hidden="true">&#8659;</span>
+          Install
+        </button>
+ 
+        <button
+          type="button"
+          class="icon-btn"
+          id="print-btn"
+          aria-label="Print day"
+          title="Print"
+        >
+          <span aria-hidden="true">&#9113;</span>
+        </button>
+      </div>
+    </header>
+ 
+    <!-- Date navigation -->
+    <nav class="date-bar" aria-label="Date navigation">
+      <div class="date-nav-group">
+        <button type="button" class="nav-btn" id="prev-day" aria-label="Previous day">
+          <span aria-hidden="true">&#8249;</span>
+        </button>
+ 
+        <button type="button" class="nav-btn" id="next-day" aria-label="Next day">
+          <span aria-hidden="true">&#8250;</span>
+        </button>
+ 
+        <button type="button" class="today-btn" id="today-btn">
+          Today
+        </button>
+      </div>
+ 
+      <time id="date-display" aria-live="polite" aria-label="Selected date"></time>
+    </nav>
+ 
+    <!-- Main content -->
+    <main class="planner-body">
+ 
+      <!-- Most Important -->
+      <section class="card" aria-labelledby="most-important-heading">
+        <div class="card-header">
+          <h2 class="card-label" id="most-important-heading">Most Important</h2>
+          <div class="card-rule" aria-hidden="true"></div>
+          <span class="card-hint">Top 3 for today</span>
+        </div>
+ 
+        <div class="mi-list">
+          <div class="mi-row">
+            <label class="mi-num" for="mi-0" aria-label="Most important task 1">1</label>
+            <input
+              class="mi-input"
+              id="mi-0"
+              name="most-important-1"
+              type="text"
+              placeholder="Your most important task today…"
+              maxlength="200"
+              autocomplete="off"
+            >
+          </div>
+ 
+          <div class="mi-row">
+            <label class="mi-num" for="mi-1" aria-label="Most important task 2">2</label>
+            <input
+              class="mi-input"
+              id="mi-1"
+              name="most-important-2"
+              type="text"
+              placeholder="Second priority…"
+              maxlength="200"
+              autocomplete="off"
+            >
+          </div>
+ 
+          <div class="mi-row">
+            <label class="mi-num" for="mi-2" aria-label="Most important task 3">3</label>
+            <input
+              class="mi-input"
+              id="mi-2"
+              name="most-important-3"
+              type="text"
+              placeholder="Third priority…"
+              maxlength="200"
+              autocomplete="off"
+            >
+          </div>
+        </div>
+      </section>
+ 
+      <!-- Task list -->
+      <section class="card" aria-labelledby="tasks-heading">
+        <div class="card-header">
+          <h2 class="card-label" id="tasks-heading">Tasks</h2>
+          <div class="card-rule" aria-hidden="true"></div>
+        </div>
+ 
+        <div id="task-list" class="task-list" role="list" aria-label="Tasks"></div>
+ 
+        <div class="add-task-area">
+          <button type="button" class="add-task-trigger" id="add-task-trigger">
+            + Add task
+          </button>
+ 
+          <form class="add-task-form" id="add-task-form" novalidate>
+            <div class="add-task-row">
+              <label for="new-task-input">Task description</label>
+              <input
+                class="new-task-input"
+                id="new-task-input"
+                name="task-text"
+                type="text"
+                placeholder="Describe the task…"
+                maxlength="200"
+                autocomplete="off"
+                required
+              >
+ 
+              <label for="new-task-priority">Priority</label>
+              <select
+                class="new-task-priority"
+                id="new-task-priority"
+                name="task-priority"
+              >
+                <option value="A">A — Must do</option>
+                <option value="B" selected>B — Should do</option>
+                <option value="C">C — Nice to do</option>
+              </select>
+            </div>
+ 
+            <div class="add-task-actions">
+              <button type="button" class="btn-ghost" id="cancel-add">
+                Cancel
+              </button>
+              <button type="submit" class="btn-primary">
+                Add Task
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+ 
+      <!-- Notes -->
+      <section class="card" aria-labelledby="notes-heading">
+        <div class="card-header">
+          <h2 class="card-label" id="notes-heading">Notes</h2>
+          <div class="card-rule" aria-hidden="true"></div>
+        </div>
+ 
+        <div class="notes-wrap">
+          <label for="notes">Daily notes</label>
+          <textarea
+            id="notes"
+            name="notes"
+            placeholder="Daily notes, ideas, follow-ups…"
+            rows="6"
+          ></textarea>
+        </div>
+      </section>
+ 
+    </main>
+ 
+    <!-- Priority legend -->
+    <footer class="legend" aria-label="Priority key">
+      <div class="legend-item">
+        <span class="legend-dot A" aria-hidden="true"></span>
+        A — Must do
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot B" aria-hidden="true"></span>
+        B — Should do
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot C" aria-hidden="true"></span>
+        C — Nice to do
+      </div>
+    </footer>
+ 
+  </div>
+</body>
+</html>  <!-- Date navigation -->
   <div class="date-bar">
     <div class="date-nav-group">
       <button class="nav-btn" id="prev-day" aria-label="Previous day">&#8249;</button>
