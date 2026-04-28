@@ -1,19 +1,17 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `zaty-planner-${CACHE_VERSION}`;
- 
+
 const SHELL = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './data.js',
-  './manifest.json',
-  './icon.svg',
-  './offline.html'
+  './manifest.json'
 ];
- 
+
 const SHELL_URLS = SHELL.map(path => new URL(path, self.registration.scope).toString());
- 
+
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -21,7 +19,7 @@ self.addEventListener('install', event => {
       .then(() => self.skipWaiting())
   );
 });
- 
+
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
@@ -35,40 +33,38 @@ self.addEventListener('activate', event => {
       .then(() => self.clients.claim())
   );
 });
- 
+
 self.addEventListener('fetch', event => {
   const { request } = event;
- 
+
   if (request.method !== 'GET') return;
- 
+
   const url = new URL(request.url);
- 
   if (url.origin !== self.location.origin) return;
- 
+
   if (request.mode === 'navigate') {
     event.respondWith(handleNavigationRequest(request));
     return;
   }
- 
+
   event.respondWith(handleAssetRequest(request));
 });
- 
+
 async function handleNavigationRequest(request) {
   const cache = await caches.open(CACHE_NAME);
- 
+
   try {
     const response = await fetch(request);
- 
+
     if (isCacheable(response)) {
       await cache.put(request, response.clone());
     }
- 
+
     return response;
   } catch {
     return (
       await caches.match(request) ||
       await caches.match(new URL('./index.html', self.registration.scope).toString()) ||
-      await caches.match(new URL('./offline.html', self.registration.scope).toString()) ||
       new Response('Offline', {
         status: 503,
         statusText: 'Service Unavailable',
@@ -77,22 +73,19 @@ async function handleNavigationRequest(request) {
     );
   }
 }
- 
+
 async function handleAssetRequest(request) {
   const cached = await caches.match(request);
- 
-  if (cached) {
-    return cached;
-  }
- 
+  if (cached) return cached;
+
   try {
     const response = await fetch(request);
- 
+
     if (isCacheable(response)) {
       const cache = await caches.open(CACHE_NAME);
       await cache.put(request, response.clone());
     }
- 
+
     return response;
   } catch {
     return new Response('Offline', {
@@ -102,25 +95,7 @@ async function handleAssetRequest(request) {
     });
   }
 }
- 
+
 function isCacheable(response) {
   return response && response.ok && response.type === 'basic';
-}      if (cached) return cached;
-
-      return fetch(event.request)
-        .then(response => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => {
-          // For navigation requests, return the offline page
-          if (event.request.mode === 'navigate') {
-            return caches.match('/offline.html');
-          }
-        });
-    })
-  );
-});
+}
