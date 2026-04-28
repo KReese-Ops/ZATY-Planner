@@ -4,328 +4,151 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#8b3a2a">
-  <meta name="description" content="ZATY Planner — Franklin-style daily planning system">
- 
-  <!-- PWA -->
+  <meta name="description" content="ZATY Planner - Franklin-style daily planning system">
+
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ZATY">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
- 
+  <link rel="apple-touch-icon" href="icon.svg">
+
   <title>ZATY Planner</title>
   <link rel="stylesheet" href="styles.css">
- 
   <script src="data.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
   <noscript>
-    <p>This planner requires JavaScript to save and manage your tasks.</p>
+    <p class="noscript">This planner requires JavaScript to save and manage your tasks.</p>
   </noscript>
- 
-  <div class="app-shell">
- 
-    <!-- Top bar -->
-    <header class="top-bar">
-      <div class="brand">
-        <h1 class="brand-name">ZATY Planner</h1>
-        <span class="brand-sub">Daily Planning System</span>
+
+  <div class="page-shell">
+    <header class="hero">
+      <div class="brand-lockup">
+        <span class="eyebrow">Daily Planning System</span>
+        <h1>ZATY</h1>
+        <p>Plan the day, prioritize the essentials, and keep your notes in one calm workspace.</p>
       </div>
- 
-      <div class="top-actions" aria-label="App actions">
-        <button
-          type="button"
-          class="install-btn"
-          id="install-btn"
-          aria-label="Install ZATY Planner"
-          hidden
-        >
-          <span aria-hidden="true">&#8659;</span>
-          Install
+
+      <div class="hero-actions" aria-label="Planner actions">
+        <button type="button" class="secondary-action" id="install-btn" hidden>
+          Install App
         </button>
- 
-        <button
-          type="button"
-          class="icon-btn"
-          id="print-btn"
-          aria-label="Print day"
-          title="Print"
-        >
-          <span aria-hidden="true">&#9113;</span>
+        <button type="button" class="secondary-action" id="print-btn">
+          Print Day
         </button>
       </div>
     </header>
- 
-    <!-- Date navigation -->
-    <nav class="date-bar" aria-label="Date navigation">
-      <div class="date-nav-group">
-        <button type="button" class="nav-btn" id="prev-day" aria-label="Previous day">
-          <span aria-hidden="true">&#8249;</span>
-        </button>
- 
-        <button type="button" class="nav-btn" id="next-day" aria-label="Next day">
-          <span aria-hidden="true">&#8250;</span>
-        </button>
- 
-        <button type="button" class="today-btn" id="today-btn">
-          Today
-        </button>
-      </div>
- 
-      <time id="date-display" aria-live="polite" aria-label="Selected date"></time>
-    </nav>
- 
-    <!-- Main content -->
-    <main class="planner-body">
- 
-      <!-- Most Important -->
-      <section class="card" aria-labelledby="most-important-heading">
-        <div class="card-header">
-          <h2 class="card-label" id="most-important-heading">Most Important</h2>
-          <div class="card-rule" aria-hidden="true"></div>
-          <span class="card-hint">Top 3 for today</span>
-        </div>
- 
-        <div class="mi-list">
-          <div class="mi-row">
-            <label class="mi-num" for="mi-0" aria-label="Most important task 1">1</label>
-            <input
-              class="mi-input"
-              id="mi-0"
-              name="most-important-1"
-              type="text"
-              placeholder="Your most important task today…"
-              maxlength="200"
-              autocomplete="off"
-            >
-          </div>
- 
-          <div class="mi-row">
-            <label class="mi-num" for="mi-1" aria-label="Most important task 2">2</label>
-            <input
-              class="mi-input"
-              id="mi-1"
-              name="most-important-2"
-              type="text"
-              placeholder="Second priority…"
-              maxlength="200"
-              autocomplete="off"
-            >
-          </div>
- 
-          <div class="mi-row">
-            <label class="mi-num" for="mi-2" aria-label="Most important task 3">3</label>
-            <input
-              class="mi-input"
-              id="mi-2"
-              name="most-important-3"
-              type="text"
-              placeholder="Third priority…"
-              maxlength="200"
-              autocomplete="off"
-            >
-          </div>
-        </div>
-      </section>
- 
-      <!-- Task list -->
-      <section class="card" aria-labelledby="tasks-heading">
-        <div class="card-header">
-          <h2 class="card-label" id="tasks-heading">Tasks</h2>
-          <div class="card-rule" aria-hidden="true"></div>
-        </div>
- 
-        <div id="task-list" class="task-list" role="list" aria-label="Tasks"></div>
- 
-        <div class="add-task-area">
-          <button type="button" class="add-task-trigger" id="add-task-trigger">
-            + Add task
-          </button>
- 
-          <form class="add-task-form" id="add-task-form" novalidate>
-            <div class="add-task-row">
-              <label for="new-task-input">Task description</label>
-              <input
-                class="new-task-input"
-                id="new-task-input"
-                name="task-text"
-                type="text"
-                placeholder="Describe the task…"
-                maxlength="200"
-                autocomplete="off"
-                required
-              >
- 
-              <label for="new-task-priority">Priority</label>
-              <select
-                class="new-task-priority"
-                id="new-task-priority"
-                name="task-priority"
-              >
-                <option value="A">A — Must do</option>
-                <option value="B" selected>B — Should do</option>
-                <option value="C">C — Nice to do</option>
-              </select>
-            </div>
- 
-            <div class="add-task-actions">
-              <button type="button" class="btn-ghost" id="cancel-add">
-                Cancel
-              </button>
-              <button type="submit" class="btn-primary">
-                Add Task
-              </button>
-            </div>
-          </form>
-        </div>
-      </section>
- 
-      <!-- Notes -->
-      <section class="card" aria-labelledby="notes-heading">
-        <div class="card-header">
-          <h2 class="card-label" id="notes-heading">Notes</h2>
-          <div class="card-rule" aria-hidden="true"></div>
-        </div>
- 
-        <div class="notes-wrap">
-          <label for="notes">Daily notes</label>
-          <textarea
-            id="notes"
-            name="notes"
-            placeholder="Daily notes, ideas, follow-ups…"
-            rows="6"
-          ></textarea>
-        </div>
-      </section>
- 
-    </main>
- 
-    <!-- Priority legend -->
-    <footer class="legend" aria-label="Priority key">
-      <div class="legend-item">
-        <span class="legend-dot A" aria-hidden="true"></span>
-        A — Must do
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot B" aria-hidden="true"></span>
-        B — Should do
-      </div>
-      <div class="legend-item">
-        <span class="legend-dot C" aria-hidden="true"></span>
-        C — Nice to do
-      </div>
-    </footer>
- 
-  </div>
-</body>
-</html>  <!-- Date navigation -->
-  <div class="date-bar">
-    <div class="date-nav-group">
-      <button class="nav-btn" id="prev-day" aria-label="Previous day">&#8249;</button>
-      <button class="nav-btn" id="next-day" aria-label="Next day">&#8250;</button>
-      <button class="today-btn" id="today-btn" aria-label="Go to today">Today</button>
-    </div>
-    <div id="date-display" aria-live="polite"></div>
-  </div>
 
-  <!-- Main content -->
-  <main class="planner-body">
-
-    <!-- Most Important (3 manually entered priorities) -->
-    <section class="card" aria-label="Most Important Tasks">
-      <div class="card-header">
-        <span class="card-label">Most Important</span>
-        <div class="card-rule"></div>
-        <span class="card-hint">Top 3 for today</span>
+    <section class="date-panel" aria-label="Date navigation">
+      <div>
+        <span class="date-kicker">Planning page</span>
+        <time id="date-display" aria-live="polite" aria-label="Selected date"></time>
       </div>
-      <div class="mi-list">
-        <div class="mi-row">
-          <span class="mi-num">1</span>
-          <input
-            class="mi-input" id="mi-0" type="text"
-            placeholder="Your most important task today…"
-            maxlength="200" autocomplete="off"
-          >
-        </div>
-        <div class="mi-row">
-          <span class="mi-num">2</span>
-          <input
-            class="mi-input" id="mi-1" type="text"
-            placeholder="Second priority…"
-            maxlength="200" autocomplete="off"
-          >
-        </div>
-        <div class="mi-row">
-          <span class="mi-num">3</span>
-          <input
-            class="mi-input" id="mi-2" type="text"
-            placeholder="Third priority…"
-            maxlength="200" autocomplete="off"
-          >
-        </div>
+
+      <div class="date-controls">
+        <button type="button" class="icon-action" id="prev-day" aria-label="Previous day">
+          <span aria-hidden="true">&lsaquo;</span>
+        </button>
+        <button type="button" class="today-action" id="today-btn">Today</button>
+        <button type="button" class="icon-action" id="next-day" aria-label="Next day">
+          <span aria-hidden="true">&rsaquo;</span>
+        </button>
       </div>
     </section>
 
-    <!-- Task list -->
-    <section class="card" aria-label="Task List">
-      <div class="card-header">
-        <span class="card-label">Tasks</span>
-        <div class="card-rule"></div>
-      </div>
-      <div id="task-list" class="task-list" role="list"></div>
-      <div class="add-task-area">
-        <button class="add-task-trigger" id="add-task-trigger">+ Add task</button>
-        <form class="add-task-form" id="add-task-form" novalidate>
-          <div class="add-task-row">
-            <input
-              class="new-task-input" id="new-task-input" type="text"
-              placeholder="Describe the task…"
-              maxlength="200" autocomplete="off" required
-            >
-            <select class="new-task-priority" id="new-task-priority" aria-label="Priority">
-              <option value="A">A</option>
-              <option value="B" selected>B</option>
-              <option value="C">C</option>
-            </select>
+    <main class="planner-grid">
+      <section class="planner-card priorities-card" aria-labelledby="most-important-heading">
+        <div class="card-heading">
+          <div>
+            <span class="section-number">01</span>
+            <h2 id="most-important-heading">Most Important</h2>
           </div>
-          <div class="add-task-actions">
-            <button type="button" class="btn-ghost" id="cancel-add">Cancel</button>
-            <button type="submit" class="btn-primary">Add Task</button>
+          <p>Top 3 outcomes for today</p>
+        </div>
+
+        <div class="priority-list">
+          <label class="priority-row" for="mi-0">
+            <span>1</span>
+            <input id="mi-0" class="mi-input" type="text" placeholder="Your most important task today..." maxlength="200" autocomplete="off">
+          </label>
+          <label class="priority-row" for="mi-1">
+            <span>2</span>
+            <input id="mi-1" class="mi-input" type="text" placeholder="Second priority..." maxlength="200" autocomplete="off">
+          </label>
+          <label class="priority-row" for="mi-2">
+            <span>3</span>
+            <input id="mi-2" class="mi-input" type="text" placeholder="Third priority..." maxlength="200" autocomplete="off">
+          </label>
+        </div>
+      </section>
+
+      <section class="planner-card tasks-card" aria-labelledby="tasks-heading">
+        <div class="card-heading">
+          <div>
+            <span class="section-number">02</span>
+            <h2 id="tasks-heading">Daily Tasks</h2>
           </div>
+          <p>Franklin A/B/C priorities</p>
+        </div>
+
+        <form class="quick-add" id="add-task-form" novalidate>
+          <label class="sr-only" for="new-task-input">Task description</label>
+          <input id="new-task-input" class="new-task-input" type="text" placeholder="Add a task..." maxlength="200" autocomplete="off" required>
+
+          <label class="sr-only" for="new-task-priority">Priority</label>
+          <select id="new-task-priority" class="new-task-priority" aria-label="Priority">
+            <option value="A">A</option>
+            <option value="B" selected>B</option>
+            <option value="C">C</option>
+          </select>
+
+          <button type="submit" class="primary-action">Add</button>
         </form>
-      </div>
-    </section>
 
-    <!-- Notes -->
-    <section class="card" aria-label="Daily Notes">
-      <div class="card-header">
-        <span class="card-label">Notes</span>
-        <div class="card-rule"></div>
-      </div>
-      <div class="notes-wrap">
-        <textarea
-          id="notes"
-          placeholder="Daily notes, ideas, follow-ups…"
-          rows="6"
-          aria-label="Daily notes"
-        ></textarea>
-      </div>
-    </section>
+        <div id="task-list" class="task-list" role="list" aria-label="Tasks"></div>
 
-  </main>
+        <div class="empty-state" id="empty-state" hidden>
+          <strong>No tasks yet.</strong>
+          <span>Add the next clear action for this day.</span>
+        </div>
+      </section>
 
-  <!-- Priority legend -->
-  <footer class="legend" aria-label="Priority key">
-    <div class="legend-item"><span class="legend-dot A"></span>A — Must do</div>
-    <div class="legend-item"><span class="legend-dot B"></span>B — Should do</div>
-    <div class="legend-item"><span class="legend-dot C"></span>C — Nice to do</div>
-  </footer>
+      <aside class="planner-side">
+        <section class="planner-card notes-card" aria-labelledby="notes-heading">
+          <div class="card-heading">
+            <div>
+              <span class="section-number">03</span>
+              <h2 id="notes-heading">Notes</h2>
+            </div>
+            <p>Ideas, calls, follow-ups</p>
+          </div>
 
-</div>
+          <label class="sr-only" for="notes">Daily notes</label>
+          <textarea id="notes" name="notes" placeholder="Daily notes, ideas, follow-ups..." rows="10"></textarea>
+        </section>
 
-<script src="data.js"></script>
-<script src="app.js"></script>
+        <section class="planner-card legend-card" aria-label="Priority key">
+          <h2>Priority Key</h2>
+          <div class="legend-item">
+            <span class="legend-dot priority-a" aria-hidden="true"></span>
+            <strong>A</strong>
+            <span>Must do</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot priority-b" aria-hidden="true"></span>
+            <strong>B</strong>
+            <span>Should do</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot priority-c" aria-hidden="true"></span>
+            <strong>C</strong>
+            <span>Nice to do</span>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
 </body>
 </html>
