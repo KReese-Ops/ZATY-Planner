@@ -1,5 +1,4 @@
 const App = (() => {
-  const MS_PER_DAY = 24 * 60 * 60 * 1000;
   const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     month: 'long',
@@ -92,7 +91,7 @@ const App = (() => {
 
   function changeDay(offset) {
     const date = parseDateString(state.selectedDate);
-    date.setUTCDate(date.getUTCDate() + offset);
+    date.setDate(date.getDate() + offset);
     selectDay(toDateString(date));
   }
 
@@ -212,12 +211,15 @@ const App = (() => {
   }
 
   function toDateString(date) {
-    return date.toISOString().slice(0, 10);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   function parseDateString(dateStr) {
     const [year, month, day] = dateStr.split('-').map(Number);
-    return new Date(Date.UTC(year, month - 1, day));
+    return new Date(year, month - 1, day);
   }
 
   function registerServiceWorker() {

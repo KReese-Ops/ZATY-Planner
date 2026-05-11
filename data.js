@@ -1,8 +1,11 @@
 const Storage = (() => {
   const KEY_PREFIX = 'zaty_';
-  const DEFAULT_DAY = { mostImportant: ['', '', ''], tasks: [], notes: '' };
   const VALID_PRIORITIES = new Set(['A', 'B', 'C']);
   const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+  function createDefaultDay() {
+    return { mostImportant: ['', '', ''], tasks: [], notes: '' };
+  }
  
   function isValidDateStr(dateStr) {
     return typeof dateStr === 'string' && DATE_RE.test(dateStr);
@@ -61,17 +64,17 @@ const Storage = (() => {
     try {
       raw = localStorage.getItem(dayKey(dateStr));
     } catch {
-      return { ...DEFAULT_DAY };
+      return createDefaultDay();
     }
  
     if (!raw) {
-      return { ...DEFAULT_DAY };
+      return createDefaultDay();
     }
  
     try {
       return normalizeDay(JSON.parse(raw));
     } catch {
-      return { ...DEFAULT_DAY };
+      return createDefaultDay();
     }
   }
  

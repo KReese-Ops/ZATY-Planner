@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#4A6FA5" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
 <title>ZATY Planner</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -43,6 +46,13 @@
   .date-nav { display: flex; align-items: center; gap: 10px; }
   .nav-btn { background: none; border: 1px solid var(--border-dark); border-radius: 6px; width: 30px; height: 30px; cursor: pointer; font-size: 16px; color: var(--ink-light); display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
   .nav-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .nav-btn:focus-visible,
+  .today-pill:focus-visible,
+  .vtab:focus-visible,
+  .cal-connect-btn:focus-visible,
+  .add-btn:focus-visible,
+  .task-check:focus-visible,
+  .week-col:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .date-label { font-size: 13px; font-weight: 500; color: var(--ink); min-width: 210px; text-align: center; }
   .today-pill { font-size: 11px; font-weight: 500; background: var(--accent-light); color: var(--accent); border: 1px solid var(--border-dark); border-radius: 5px; padding: 3px 10px; cursor: pointer; display: none; transition: all 0.15s; }
   .today-pill:hover { background: var(--accent); color: #fff; }
@@ -189,16 +199,16 @@
   <div class="topbar-left">
     <div class="brand">ZATY Planner <span>Daily Edition</span></div>
     <div class="view-tabs">
-      <button class="vtab active" onclick="setView('day',this)">Day</button>
-      <button class="vtab" onclick="setView('week',this)">Week</button>
+      <button type="button" class="vtab active" onclick="setView('day',this)">Day</button>
+      <button type="button" class="vtab" onclick="setView('week',this)">Week</button>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
-    <button class="today-pill" id="today-pill" onclick="goToday()">Today</button>
+    <button type="button" class="today-pill" id="today-pill" onclick="goToday()">Today</button>
     <div class="date-nav">
-      <button class="nav-btn" onclick="changeDay(-1)">&#8249;</button>
+      <button type="button" class="nav-btn" aria-label="Previous day" onclick="changeDay(-1)">&#8249;</button>
       <span class="date-label" id="date-label"></span>
-      <button class="nav-btn" onclick="changeDay(1)">&#8250;</button>
+      <button type="button" class="nav-btn" aria-label="Next day" onclick="changeDay(1)">&#8250;</button>
     </div>
   </div>
 </div>
@@ -261,7 +271,7 @@
               <option value="C">C</option>
             </select>
             <input class="add-input" id="new-task" placeholder="Add a task…" autocomplete="off" onkeydown="if(event.key==='Enter')addTask()">
-            <button class="add-btn" onclick="addTask()">Add</button>
+            <button type="button" class="add-btn" onclick="addTask()">Add</button>
           </div>
         </div>
       </div>
@@ -279,7 +289,7 @@
             <span class="leg-item"><span class="cal-dot" style="background:var(--family)"></span>Family</span>
             <span class="leg-item"><span class="cal-dot" style="background:var(--personal)"></span>Personal</span>
           </div>
-          <button class="cal-connect-btn" id="cal-btn" onclick="connectCalendar()">
+          <button type="button" class="cal-connect-btn" id="cal-btn" aria-expanded="false" onclick="connectCalendar()">
             &#128197; Connect Google Calendar
           </button>
           <div class="cal-notice" id="cal-notice">
@@ -297,7 +307,7 @@
               <option value="family">Family</option>
               <option value="personal" selected>Personal</option>
             </select>
-            <button class="add-btn" onclick="addAppt()">Add</button>
+            <button type="button" class="add-btn" onclick="addAppt()">Add</button>
           </div>
         </div>
       </div>
@@ -354,6 +364,7 @@ var today = new Date();
 today.setHours(0,0,0,0);
 var current = new Date(today);
 var currentView = 'day';
+var calendarPlaceholderShown = false;
 
 // ── KEY HELPERS ──────────────────────────────────────────
 function pad2(n) {
@@ -581,7 +592,7 @@ function renderTasks() {
   el.innerHTML = sorted.map(function(t) {
     var rolledTag = t.rolled ? '<span class="task-rolled" title="Rolled over from previous day">&#8617; carried</span>' : '';
     return '<div class="task-row">'
-      + '<input type="checkbox" class="task-check" ' + (t.done ? 'checked' : '') + ' onchange="toggleTask(\'' + t.id + '\')" />'
+      + '<input type="checkbox" class="task-check" aria-label="Mark task complete" ' + (t.done ? 'checked' : '') + ' onchange="toggleTask(\'' + t.id + '\')" />'
       + '<select class="pri-badge" data-p="' + t.p + '" title="Change priority" onchange="changeTaskPriority(\'' + t.id + '\',this.value,this)">'
       +   '<option value="A"' + (t.p==='A'?' selected':'') + '>A</option>'
       +   '<option value="B"' + (t.p==='B'?' selected':'') + '>B</option>'
@@ -701,9 +712,12 @@ function connectCalendar() {
   var notice = document.getElementById('cal-notice');
   if (notice) notice.style.display = 'block';
   if (btn) {
-    btn.textContent = '📅 Google Calendar Coming Soon';
+    btn.textContent = '📅 Calendar Placeholder Active';
+    btn.classList.add('connected');
     btn.setAttribute('aria-expanded', 'true');
   }
+  if (calendarPlaceholderShown) return;
+  calendarPlaceholderShown = true;
 
   // Placeholder for Google Calendar OAuth + API integration.
   // In production: trigger google.accounts.oauth2 flow, then fetch events via
@@ -756,7 +770,7 @@ function renderWeek() {
     var colClass = 'week-col' + (isToday ? ' is-today' : '') + (isCurrent ? ' is-current' : '');
     var dk = dateKey(d);
 
-    return '<div class="' + colClass + '" onclick="jumpToDay(\'' + dk + '\')" title="Go to ' + DAYS[d.getDay()] + '">'
+    return '<div class="' + colClass + '" role="button" tabindex="0" onclick="jumpToDay(\'' + dk + '\')" onkeydown="handleWeekDayKey(\'' + dk + '\', event)" title="Go to ' + DAYS[d.getDay()] + '">'
       + '<div class="week-day-header">'
       +   '<div class="week-day-label">' + DAY_ABBR[d.getDay()] + '</div>'
       +   '<div class="week-day-num">' + d.getDate() + '</div>'
@@ -786,6 +800,13 @@ function jumpToDay(dk) {
   setView('day', document.querySelector('.vtab'));
   renderDate();
   renderAll();
+}
+
+function handleWeekDayKey(dk, event) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    jumpToDay(dk);
+  }
 }
 
 // ── VIEW SWITCHING ───────────────────────────────────────
@@ -818,6 +839,11 @@ function escHtml(str) {
   renderDate();
   renderAll();
   if (startupRolled > 0) showRolloverNotice(startupRolled, null);
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').catch(function() {
+      // App remains functional without offline support.
+    });
+  }
 })();
 </script>
 </body>
