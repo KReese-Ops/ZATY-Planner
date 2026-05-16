@@ -40,6 +40,8 @@
   .topbar-left { display: flex; align-items: center; gap: 16px; }
   .brand { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; font-weight: 600; color: var(--accent); letter-spacing: 0.01em; white-space: nowrap; }
   .brand span { font-size: 11px; font-weight: 300; font-family: 'DM Sans', sans-serif; color: var(--ink-light); margin-left: 8px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .home-link { font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); text-decoration: none; letter-spacing: 0.02em; white-space: nowrap; transition: color 0.15s; }
+  .home-link:hover { color: var(--accent); }
   .view-tabs { display: flex; gap: 2px; background: var(--sky); border-radius: 8px; padding: 3px; border: 1px solid var(--border); }
   .vtab { background: none; border: none; padding: 4px 14px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); cursor: pointer; border-radius: 6px; font-weight: 400; transition: all 0.15s; }
   .vtab.active { background: var(--warm-white); color: var(--ink); font-weight: 500; box-shadow: var(--shadow); }
@@ -197,6 +199,7 @@
 <!-- ── TOP BAR ── -->
 <div class="topbar">
   <div class="topbar-left">
+    <a href="homepage.html?from=planner" class="home-link">&#8592; Home</a>
     <div class="brand">ZATY Planner <span>Daily Edition</span></div>
     <div class="view-tabs">
       <button type="button" class="vtab active" onclick="setView('day',this)">Day</button>
