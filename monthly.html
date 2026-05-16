@@ -88,6 +88,7 @@
   .pri-marker { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; border: 1px solid transparent; line-height: 1.4; }
   .pri-marker.a { background: var(--a-bg); color: var(--a-text); border-color: var(--a-border); }
   .pri-marker.b { background: var(--b-bg); color: var(--b-text); border-color: var(--b-border); }
+  .pri-marker.c { background: #F2F9F0; color: #2E6B3E; border-color: #B6DABC; }
 
   /* task count hint */
   .day-task-count { font-size: 10px; color: var(--ink-faint); margin-top: auto; padding-top: 4px; }
@@ -180,6 +181,9 @@
     <div class="legend-item">
       <span class="pri-marker b">B</span> Should-do tasks present
     </div>
+    <div class="legend-item">
+      <span class="pri-marker c">C</span> If-time tasks present
+    </div>
     <div class="legend-item" style="margin-left:auto;color:var(--ink-faint);font-size:11px;">
       Click any date to open that day in the planner
     </div>
@@ -220,19 +224,19 @@ function loadDayData(y, m, d) {
 }
 
 // ── TASK MARKER LOGIC ─────────────────────────────────────────────────────
-// Returns { hasA: bool, hasB: bool, total: int, done: int } for a given day.
+// Returns { hasA, hasB, hasC: bool, total: int, done: int } for a given day.
 function dayPriorities(y, m, d) {
   var data = loadDayData(y, m, d);
-  if (!data || !data.tasks.length) return { hasA: false, hasB: false, total: 0, done: 0 };
-  var hasA = false, hasB = false, total = 0, done = 0;
+  if (!data || !data.tasks.length) return { hasA: false, hasB: false, hasC: false, total: 0, done: 0 };
+  var hasA = false, hasB = false, hasC = false, total = 0, done = 0;
   data.tasks.forEach(function (t) {
     total++;
     if (t.done) done++;
     if (t.p === 'A') hasA = true;
     if (t.p === 'B') hasB = true;
-    // C tasks intentionally do NOT set any marker
+    if (t.p === 'C') hasC = true;
   });
-  return { hasA: hasA, hasB: hasB, total: total, done: done };
+  return { hasA: hasA, hasB: hasB, hasC: hasC, total: total, done: done };
 }
 
 // ── MONTHLY SUMMARY ───────────────────────────────────────────────────────
@@ -330,8 +334,8 @@ function renderCalendar(y, m) {
     link.appendChild(dayNum);
     cell.appendChild(link);
 
-    // A / B priority markers
-    if (pri.hasA || pri.hasB) {
+    // A / B / C priority markers — one badge per priority present
+    if (pri.hasA || pri.hasB || pri.hasC) {
       var markers = document.createElement('div');
       markers.className = 'day-markers';
       if (pri.hasA) {
@@ -347,6 +351,13 @@ function renderCalendar(y, m) {
         mb.textContent = 'B';
         mb.title       = 'Should-do task on this day';
         markers.appendChild(mb);
+      }
+      if (pri.hasC) {
+        var mc = document.createElement('span');
+        mc.className   = 'pri-marker c';
+        mc.textContent = 'C';
+        mc.title       = 'If-time task on this day';
+        markers.appendChild(mc);
       }
       cell.appendChild(markers);
     }
