@@ -204,6 +204,7 @@
     <div class="view-tabs">
       <button type="button" class="vtab active" onclick="setView('day',this)">Day</button>
       <button type="button" class="vtab" onclick="setView('week',this)">Week</button>
+      <button type="button" class="vtab" onclick="window.location.href='monthly.html'">Month</button>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
@@ -825,6 +826,9 @@ function setView(v, btn) {
       b.classList.add('active');
     }
   });
+  // Update brand subtitle
+  var brandSpan = document.querySelector('.brand span');
+  if (brandSpan) brandSpan.textContent = v === 'week' ? 'Weekly Edition' : 'Daily Edition';
   if (v === 'week') renderWeek();
 }
 
@@ -846,6 +850,11 @@ function escHtml(str) {
       if (parts.length === 3 && !isNaN(parts[0])) {
         current = new Date(parts[0], parts[1] - 1, parts[2]);
       }
+    }
+    // If monthly page requested week view
+    if (sessionStorage.getItem('zaty_open_week')) {
+      sessionStorage.removeItem('zaty_open_week');
+      setView('week', null);
     }
   } catch (e) { /* sessionStorage blocked — open today */ }
 
