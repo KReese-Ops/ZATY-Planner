@@ -35,7 +35,7 @@
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; }
-  body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--sky); color: var(--ink); font-size: 14px; min-height: 100vh; }
+  body { font-family: 'DM Sans', -apple-system, sans-serif; background: #FFF2E6; color: var(--ink); font-size: 14px; min-height: 100vh; }
 
   /* ── TOP BAR ── */
   .topbar { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 10; gap: 1rem; }
@@ -44,6 +44,10 @@
   .brand span { font-size: 11px; font-weight: 300; font-family: 'DM Sans', sans-serif; color: var(--ink-light); margin-left: 8px; letter-spacing: .08em; text-transform: uppercase; }
   .home-link { font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); text-decoration: none; letter-spacing: .02em; white-space: nowrap; transition: color .15s; }
   .home-link:hover, .home-link:focus-visible { color: var(--accent); }
+  .view-tabs { display: flex; gap: 2px; background: var(--sky); border-radius: 8px; padding: 3px; border: 1px solid var(--border); }
+  .vtab { background: none; border: none; padding: 4px 14px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); cursor: pointer; border-radius: 6px; font-weight: 400; transition: all .15s; text-decoration: none; display: inline-block; }
+  .vtab:hover { color: var(--ink); }
+  .vtab.active { background: var(--warm-white); color: var(--ink); font-weight: 500; box-shadow: var(--shadow); }
   .month-nav { display: flex; align-items: center; gap: 10px; }
   .nav-btn { background: none; border: 1px solid var(--border-dark); border-radius: 6px; width: 30px; height: 30px; cursor: pointer; font-size: 16px; color: var(--ink-light); display: flex; align-items: center; justify-content: center; transition: all .15s; }
   .nav-btn:hover, .nav-btn:focus-visible { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
@@ -113,6 +117,14 @@
     .cal-cell { min-height: 50px; padding: 3px 3px; }
   }
 
+  /* ── MONTHLY REFLECTION ── */
+  .reflection-card { background: var(--warm-white); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1rem 1.25rem; margin-top: 1.25rem; }
+  .reflection-title { font-size: 10px; font-weight: 600; color: var(--ink-faint); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+  .reflection-prompt { font-size: 13px; color: var(--ink-light); margin-bottom: 10px; font-style: italic; line-height: 1.6; }
+  .reflection-area { width: 100%; min-height: 110px; border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--ink); background: #FFF9F5; resize: vertical; line-height: 1.7; transition: border-color .15s, background .15s; }
+  .reflection-area:focus { outline: none; border-color: var(--accent); background: var(--warm-white); }
+  .reflection-area::placeholder { color: var(--ink-faint); }
+
   /* ── PRINT ── */
   @media print {
     .topbar, .today-pill, .month-nav { display: none !important; }
@@ -133,6 +145,11 @@
        class="home-link"
        onclick="try{sessionStorage.setItem('zaty_from_planner','1')}catch(e){}">&#8592; Home</a>
     <div class="brand">ZATY Planner <span>Monthly</span></div>
+    <div class="view-tabs">
+      <a href="planner.html" class="vtab">Day</a>
+      <a href="planner.html" class="vtab" onclick="try{sessionStorage.setItem('zaty_open_week','1')}catch(e){}" >Week</a>
+      <span class="vtab active">Month</span>
+    </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <button type="button" class="today-pill" id="today-pill" onclick="goThisMonth()">This Month</button>
@@ -187,6 +204,15 @@
     <div class="legend-item" style="margin-left:auto;color:var(--ink-faint);font-size:11px;">
       Click any date to open that day in the planner
     </div>
+  </div>
+
+  <!-- ── MONTHLY REFLECTION ── -->
+  <div class="reflection-card">
+    <div class="reflection-title">Monthly Reflection</div>
+    <div class="reflection-prompt">What progress am I most proud of this month? What would I like to carry forward into next month?</div>
+    <textarea class="reflection-area" id="reflection-area" rows="5"
+      placeholder="Write your thoughts here…"
+      onblur="saveReflection()"></textarea>
   </div>
 
 </div>
@@ -376,6 +402,8 @@ function renderCalendar(y, m) {
 
   // Update monthly summary
   buildSummary(y, m);
+  // Load reflection for this month
+  loadReflection(y, m);
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────────────────
@@ -397,6 +425,29 @@ function goThisMonth() {
 // to that date automatically. If the planner already supports ?date= on the
 // URL, the click handler above also sets that as a fallback.
 // This function is here for completeness and can be extended later.
+
+// ── MONTHLY REFLECTION ───────────────────────────────────────────────────
+function reflectionKey(y, m) {
+  return 'zaty_monthly_reflection_' + y + '-' + pad2(m + 1);
+}
+
+function loadReflection(y, m) {
+  var el = document.getElementById('reflection-area');
+  if (!el) return;
+  try {
+    el.value = localStorage.getItem(reflectionKey(y, m)) || '';
+  } catch (e) {
+    el.value = '';
+  }
+}
+
+function saveReflection() {
+  var el = document.getElementById('reflection-area');
+  if (!el) return;
+  try {
+    localStorage.setItem(reflectionKey(viewYear, viewMonth), el.value);
+  } catch (e) {}
+}
 
 // ── INIT ─────────────────────────────────────────────────────────────────
 (function init() {
