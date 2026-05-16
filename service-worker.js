@@ -9,7 +9,8 @@ const SHELL = [
   './homepage.html',
   './homepage.css',
   './homepage.js',
-  './planner.html'
+  './planner.html',
+  './monthly.html'
 ];
 
 const SHELL_URLS = SHELL.map(path => new URL(path, self.registration.scope).toString());
