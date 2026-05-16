@@ -836,6 +836,19 @@ function escHtml(str) {
 
 // ── INIT ─────────────────────────────────────────────────
 (function init() {
+  // If the monthly view sent the user here to a specific date, honour it.
+  // sessionStorage key set by monthly.html day-cell click handler.
+  try {
+    var jumpDate = sessionStorage.getItem('zaty_jump_date');
+    if (jumpDate) {
+      sessionStorage.removeItem('zaty_jump_date');
+      var parts = jumpDate.split('-').map(Number);
+      if (parts.length === 3 && !isNaN(parts[0])) {
+        current = new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+    }
+  } catch (e) { /* sessionStorage blocked — open today */ }
+
   // Handle startup rollover (opening app fresh on a new day)
   var startupRolled = checkStartupRollover();
   reloadCurrentDay(); // reload after potential rollover write

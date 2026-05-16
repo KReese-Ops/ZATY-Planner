@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#4A6FA5" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<title>ZATY Planner — Monthly View</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* ── Design tokens (matches planner.html palette) ── */
+  :root {
+    --sky:          #F0F5FA;
+    --warm-white:   #FFFFFF;
+    --ink:          #1C1A17;
+    --ink-light:    #6B6760;
+    --ink-faint:    #B0ADA8;
+    --border:       #D8E4F0;
+    --border-dark:  #B8CAE0;
+    --accent:       #4A6FA5;
+    --accent-hover: #3A5A90;
+    --accent-light: #E8F0F8;
+    --a-bg:         #FFF3F0;
+    --a-text:       #8B2500;
+    --a-border:     #F5C4B8;
+    --a-dot:        #D94F2E;
+    --b-bg:         #F0F4FF;
+    --b-text:       #1A3A8B;
+    --b-border:     #BFD0F5;
+    --b-dot:        #E88C30;
+    --radius:       10px;
+    --shadow:       0 1px 3px rgba(28,26,23,.08), 0 2px 8px rgba(74,111,165,.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--sky); color: var(--ink); font-size: 14px; min-height: 100vh; }
+
+  /* ── TOP BAR ── */
+  .topbar { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 10; gap: 1rem; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .brand { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; font-weight: 600; color: var(--accent); letter-spacing: .01em; white-space: nowrap; }
+  .brand span { font-size: 11px; font-weight: 300; font-family: 'DM Sans', sans-serif; color: var(--ink-light); margin-left: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .home-link { font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); text-decoration: none; letter-spacing: .02em; white-space: nowrap; transition: color .15s; }
+  .home-link:hover, .home-link:focus-visible { color: var(--accent); }
+  .month-nav { display: flex; align-items: center; gap: 10px; }
+  .nav-btn { background: none; border: 1px solid var(--border-dark); border-radius: 6px; width: 30px; height: 30px; cursor: pointer; font-size: 16px; color: var(--ink-light); display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .nav-btn:hover, .nav-btn:focus-visible { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .month-label { font-size: 14px; font-weight: 600; color: var(--ink); min-width: 160px; text-align: center; font-family: 'Playfair Display', Georgia, serif; }
+  .today-pill { font-size: 11px; font-weight: 500; background: var(--accent-light); color: var(--accent); border: 1px solid var(--border-dark); border-radius: 5px; padding: 3px 10px; cursor: pointer; border: none; transition: all .15s; }
+  .today-pill:hover, .today-pill:focus-visible { background: var(--accent); color: #fff; }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 960px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+
+  /* ── ON-TRACK SUMMARY CARD ── */
+  .summary-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .summary-title { font-size: 10px; font-weight: 600; color: var(--ink-faint); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+  .summary-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Playfair Display', Georgia, serif; font-size: 1.6rem; font-weight: 600; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--ink-light); margin-top: 2px; }
+  .on-track-badge { font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; }
+  .on-track-badge.good { background: #E8F5EE; color: #2D7A5E; border: 1px solid #B8DECE; }
+  .on-track-badge.warn { background: var(--b-bg); color: var(--b-text); border: 1px solid var(--b-border); }
+  .on-track-badge.behind { background: var(--a-bg); color: var(--a-text); border: 1px solid var(--a-border); }
+
+  /* ── CALENDAR ── */
+  .calendar-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--border); }
+  .cal-dow { font-size: 10px; font-weight: 600; color: var(--ink-faint); letter-spacing: .08em; text-transform: uppercase; text-align: center; padding: 8px 0; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .cal-cell { min-height: 88px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 6px 7px 5px; display: flex; flex-direction: column; position: relative; }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell.empty { background: var(--sky); opacity: .5; }
+  .cal-cell.today { background: var(--accent-light); }
+  .cal-cell.today .day-num { background: var(--accent); color: #fff; }
+
+  /* day number — wrapped in a link to daily planner */
+  .day-link { text-decoration: none; display: inline-block; }
+  .day-num { font-size: 13px; font-weight: 600; color: var(--ink); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background .15s, color .15s; }
+  .day-link:hover .day-num,
+  .day-link:focus-visible .day-num { background: var(--border-dark); color: var(--accent); }
+
+  /* ── PRIORITY MARKERS ── */
+  .day-markers { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .pri-marker { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; border: 1px solid transparent; line-height: 1.4; }
+  .pri-marker.a { background: var(--a-bg); color: var(--a-text); border-color: var(--a-border); }
+  .pri-marker.b { background: var(--b-bg); color: var(--b-text); border-color: var(--b-border); }
+
+  /* task count hint */
+  .day-task-count { font-size: 10px; color: var(--ink-faint); margin-top: auto; padding-top: 4px; }
+
+  /* ── LEGEND ── */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 1rem; font-size: 12px; color: var(--ink-light); align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .topbar { flex-wrap: wrap; height: auto; padding: .6rem 1rem; gap: 8px; }
+    .brand span { display: none; }
+    .summary-stats { gap: 1rem; }
+    .cal-cell { min-height: 60px; padding: 4px 5px; }
+    .day-num { font-size: 11px; width: 20px; height: 20px; }
+    .day-markers { gap: 2px; }
+    .pri-marker { font-size: 8px; padding: 1px 4px; }
+  }
+
+  @media (max-width: 400px) {
+    .cal-dow { font-size: 8px; letter-spacing: 0; }
+    .cal-cell { min-height: 50px; padding: 3px 3px; }
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    .topbar, .today-pill, .month-nav { display: none !important; }
+    body { background: #fff; }
+    .calendar-card, .summary-card { box-shadow: none; }
+  }
+
+  /* focus visible global */
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ── TOP BAR ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="homepage.html"
+       class="home-link"
+       onclick="try{sessionStorage.setItem('zaty_from_planner','1')}catch(e){}">&#8592; Home</a>
+    <div class="brand">ZATY Planner <span>Monthly</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button type="button" class="today-pill" id="today-pill" onclick="goThisMonth()">This Month</button>
+    <div class="month-nav">
+      <button type="button" class="nav-btn" aria-label="Previous month" onclick="changeMonth(-1)">&#8249;</button>
+      <span class="month-label" id="month-label"></span>
+      <button type="button" class="nav-btn" aria-label="Next month" onclick="changeMonth(1)">&#8250;</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── ON-TRACK SUMMARY ── -->
+  <div class="summary-card" id="summary-card">
+    <div>
+      <div class="summary-title">Monthly Overview</div>
+      <div class="summary-stats" id="summary-stats">
+        <div class="stat"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Tasks</div></div>
+        <div class="stat"><div class="stat-num" id="stat-done">—</div><div class="stat-label">Done</div></div>
+        <div class="stat"><div class="stat-num" id="stat-a">—</div><div class="stat-label">A tasks</div></div>
+        <div class="stat"><div class="stat-num" id="stat-a-done">—</div><div class="stat-label">A done</div></div>
+      </div>
+    </div>
+    <div class="on-track-badge" id="on-track-badge"></div>
+  </div>
+
+  <!-- ── CALENDAR GRID ── -->
+  <div class="calendar-card">
+    <div class="cal-header">
+      <div class="cal-dow">Sun</div>
+      <div class="cal-dow">Mon</div>
+      <div class="cal-dow">Tue</div>
+      <div class="cal-dow">Wed</div>
+      <div class="cal-dow">Thu</div>
+      <div class="cal-dow">Fri</div>
+      <div class="cal-dow">Sat</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <span class="pri-marker a">A</span> Must-do tasks present
+    </div>
+    <div class="legend-item">
+      <span class="pri-marker b">B</span> Should-do tasks present
+    </div>
+    <div class="legend-item" style="margin-left:auto;color:var(--ink-faint);font-size:11px;">
+      Click any date to open that day in the planner
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────────────────
+var MONTHS = ['January','February','March','April','May','June',
+              'July','August','September','October','November','December'];
+var PLANNER = 'planner.html';
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+var today       = new Date();
+var viewYear    = today.getFullYear();
+var viewMonth   = today.getMonth(); // 0-based
+
+// ── STORAGE HELPERS (mirrors planner.html) ────────────────────────────────
+function pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+function dateKey(y, m, d) {
+  // m is 0-based (JS Date convention)
+  return y + '-' + pad2(m + 1) + '-' + pad2(d);
+}
+
+function loadDayData(y, m, d) {
+  var key = 'zaty_day_' + dateKey(y, m, d);
+  try {
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    var obj = JSON.parse(raw);
+    if (!Array.isArray(obj.tasks)) obj.tasks = [];
+    return obj;
+  } catch (e) {
+    return null;
+  }
+}
+
+// ── TASK MARKER LOGIC ─────────────────────────────────────────────────────
+// Returns { hasA: bool, hasB: bool, total: int, done: int } for a given day.
+function dayPriorities(y, m, d) {
+  var data = loadDayData(y, m, d);
+  if (!data || !data.tasks.length) return { hasA: false, hasB: false, total: 0, done: 0 };
+  var hasA = false, hasB = false, total = 0, done = 0;
+  data.tasks.forEach(function (t) {
+    total++;
+    if (t.done) done++;
+    if (t.p === 'A') hasA = true;
+    if (t.p === 'B') hasB = true;
+    // C tasks intentionally do NOT set any marker
+  });
+  return { hasA: hasA, hasB: hasB, total: total, done: done };
+}
+
+// ── MONTHLY SUMMARY ───────────────────────────────────────────────────────
+function buildSummary(y, m) {
+  var daysInMonth = new Date(y, m + 1, 0).getDate();
+  var totalTasks = 0, doneTasks = 0, aTotal = 0, aDone = 0;
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var data = loadDayData(y, m, d);
+    if (!data) continue;
+    data.tasks.forEach(function (t) {
+      totalTasks++;
+      if (t.done) doneTasks++;
+      if (t.p === 'A') {
+        aTotal++;
+        if (t.done) aDone++;
+      }
+    });
+  }
+
+  document.getElementById('stat-total').textContent   = totalTasks;
+  document.getElementById('stat-done').textContent    = doneTasks;
+  document.getElementById('stat-a').textContent       = aTotal;
+  document.getElementById('stat-a-done').textContent  = aDone;
+
+  // On-track: good if ≥75% of A tasks done, warn if 50-74%, behind if <50%
+  var badge = document.getElementById('on-track-badge');
+  if (aTotal === 0) {
+    badge.textContent  = 'No A tasks';
+    badge.className    = 'on-track-badge';
+  } else {
+    var ratio = aDone / aTotal;
+    if (ratio >= 0.75) {
+      badge.textContent = '✓ On Track';
+      badge.className   = 'on-track-badge good';
+    } else if (ratio >= 0.5) {
+      badge.textContent = '⚠ Falling Behind';
+      badge.className   = 'on-track-badge warn';
+    } else {
+      badge.textContent = '✗ Off Track';
+      badge.className   = 'on-track-badge behind';
+    }
+  }
+}
+
+// ── CALENDAR RENDERING ────────────────────────────────────────────────────
+function renderCalendar(y, m) {
+  // Update header label
+  document.getElementById('month-label').textContent = MONTHS[m] + ' ' + y;
+
+  // Show/hide "This Month" pill
+  var isCurrentMonth = (y === today.getFullYear() && m === today.getMonth());
+  document.getElementById('today-pill').style.display = isCurrentMonth ? 'none' : '';
+
+  var grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  var firstDay    = new Date(y, m, 1).getDay(); // 0=Sun
+  var daysInMonth = new Date(y, m + 1, 0).getDate();
+
+  // Leading empty cells
+  for (var e = 0; e < firstDay; e++) {
+    var empty = document.createElement('div');
+    empty.className = 'cal-cell empty';
+    empty.setAttribute('aria-hidden', 'true');
+    grid.appendChild(empty);
+  }
+
+  // Day cells
+  for (var d = 1; d <= daysInMonth; d++) {
+    var isToday = isCurrentMonth && d === today.getDate();
+    var pri     = dayPriorities(y, m, d);
+    var dk      = dateKey(y, m, d);
+
+    var cell = document.createElement('div');
+    cell.className = 'cal-cell' + (isToday ? ' today' : '');
+
+    // Day number — link to daily planner with date pre-selected
+    var link = document.createElement('a');
+    link.className = 'day-link';
+    link.href      = PLANNER + '?date=' + dk;
+    link.setAttribute('aria-label', 'Open daily planner for ' + MONTHS[m] + ' ' + d + ', ' + y);
+    // Navigate to planner, opening on the correct date
+    link.addEventListener('click', function (date) {
+      return function (e) {
+        e.preventDefault();
+        try { sessionStorage.setItem('zaty_jump_date', date); } catch (err) {}
+        window.location.href = PLANNER;
+      };
+    }(dk));
+
+    var dayNum = document.createElement('span');
+    dayNum.className    = 'day-num';
+    dayNum.textContent  = d;
+    link.appendChild(dayNum);
+    cell.appendChild(link);
+
+    // A / B priority markers
+    if (pri.hasA || pri.hasB) {
+      var markers = document.createElement('div');
+      markers.className = 'day-markers';
+      if (pri.hasA) {
+        var ma = document.createElement('span');
+        ma.className   = 'pri-marker a';
+        ma.textContent = 'A';
+        ma.title       = 'Must-do task on this day';
+        markers.appendChild(ma);
+      }
+      if (pri.hasB) {
+        var mb = document.createElement('span');
+        mb.className   = 'pri-marker b';
+        mb.textContent = 'B';
+        mb.title       = 'Should-do task on this day';
+        markers.appendChild(mb);
+      }
+      cell.appendChild(markers);
+    }
+
+    // Task count hint (all tasks, shown faintly)
+    if (pri.total > 0) {
+      var hint = document.createElement('div');
+      hint.className   = 'day-task-count';
+      hint.textContent = pri.done + '/' + pri.total;
+      hint.setAttribute('aria-label', pri.done + ' of ' + pri.total + ' tasks done');
+      cell.appendChild(hint);
+    }
+
+    grid.appendChild(cell);
+  }
+
+  // Update monthly summary
+  buildSummary(y, m);
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function changeMonth(delta) {
+  viewMonth += delta;
+  if (viewMonth > 11) { viewMonth = 0;  viewYear++; }
+  if (viewMonth < 0)  { viewMonth = 11; viewYear--; }
+  renderCalendar(viewYear, viewMonth);
+}
+
+function goThisMonth() {
+  viewYear  = today.getFullYear();
+  viewMonth = today.getMonth();
+  renderCalendar(viewYear, viewMonth);
+}
+
+// ── PLANNER DATE JUMP INTEGRATION ────────────────────────────────────────
+// planner.html reads sessionStorage('zaty_jump_date') on init and navigates
+// to that date automatically. If the planner already supports ?date= on the
+// URL, the click handler above also sets that as a fallback.
+// This function is here for completeness and can be extended later.
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+(function init() {
+  // If the planner passed back a month context (e.g., user navigated here
+  // from a specific month in the planner), honour it.
+  var params = new URLSearchParams(window.location.search);
+  var dateParam = params.get('date');
+  if (dateParam) {
+    var parts = dateParam.split('-').map(Number);
+    if (parts.length === 3 && !isNaN(parts[0])) {
+      viewYear  = parts[0];
+      viewMonth = parts[1] - 1;
+    }
+  }
+  renderCalendar(viewYear, viewMonth);
+})();
+</script>
+</body>
+</html>

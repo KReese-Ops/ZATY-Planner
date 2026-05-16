@@ -3,15 +3,15 @@
   'use strict';
 
   var PREF_KEY = 'zaty_template';
-  var PLANNER  = 'planner.html';
+  var DEST = { daily: 'planner.html', weekly: 'planner.html', monthly: 'monthly.html' };
 
   // ── Template selection ───────────────────────────────────────────────────
   // Defined first so it is always reachable — including after Cancel on the
   // redirect overlay or any other early-return branch below.
   function choose(template) {
-    if (template !== 'daily' && template !== 'weekly') return;
+    if (!DEST[template]) return;
     localStorage.setItem(PREF_KEY, template);
-    window.location.href = PLANNER;
+    window.location.href = DEST[template];
   }
 
   // Expose globally so onclick= attributes work.
@@ -41,7 +41,7 @@
 
   var saved = localStorage.getItem(PREF_KEY);
 
-  if (saved === 'daily' || saved === 'weekly') {
+  if (saved && DEST[saved]) {
     showRedirectOverlay(saved);
   }
 
@@ -58,12 +58,13 @@
       return;
     }
 
-    var label = template === 'weekly' ? 'Weekly Planner' : 'Daily Planner';
-    msg.textContent = 'Opening your ' + label + '…';
+    var labels = { daily: 'Daily Planner', weekly: 'Weekly Planner', monthly: 'Monthly Planner' };
+    msg.textContent = 'Opening your ' + (labels[template] || 'Planner') + '…';
     overlay.style.display = 'flex';
 
+    var dest = DEST[template] || 'planner.html';
     var timer = setTimeout(function () {
-      window.location.href = PLANNER;
+      window.location.href = dest;
     }, 1200);
 
     document.getElementById('redirect-cancel').addEventListener('click', function () {
