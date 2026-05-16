@@ -30,13 +30,14 @@
   });
 
   // ── Auto-redirect ────────────────────────────────────────────────────────
-  // Skip when the user deliberately navigated back from the planner
-  // (planner.html links here with ?from=planner for exactly this purpose).
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('from') === 'planner') {
-    // User intentionally came back — show the homepage as-is, do not redirect.
-    return;
-  }
+  // Skip when the user deliberately navigated back from the planner.
+  // The planner's Home link sets this flag in sessionStorage before navigating.
+  var fromPlanner = false;
+  try {
+    fromPlanner = sessionStorage.getItem('zaty_from_planner') === '1';
+    if (fromPlanner) sessionStorage.removeItem('zaty_from_planner');
+  } catch (e) { /* sessionStorage blocked — treat as fresh visit */ }
+  if (fromPlanner) return;
 
   var saved = localStorage.getItem(PREF_KEY);
 

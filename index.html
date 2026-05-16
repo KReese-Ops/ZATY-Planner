@@ -199,7 +199,7 @@
 <!-- ── TOP BAR ── -->
 <div class="topbar">
   <div class="topbar-left">
-    <a href="homepage.html?from=planner" class="home-link">&#8592; Home</a>
+    <a href="homepage.html" class="home-link" onclick="try{sessionStorage.setItem('zaty_from_planner','1')}catch(e){}">&#8592; Home</a>
     <div class="brand">ZATY Planner <span>Daily Edition</span></div>
     <div class="view-tabs">
       <button type="button" class="vtab active" onclick="setView('day',this)">Day</button>

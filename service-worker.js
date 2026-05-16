@@ -1,11 +1,15 @@
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const CACHE_NAME = `zaty-planner-${CACHE_VERSION}`;
 
 const SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './homepage.html',
+  './homepage.css',
+  './homepage.js',
+  './planner.html'
 ];
 
 const SHELL_URLS = SHELL.map(path => new URL(path, self.registration.scope).toString());
