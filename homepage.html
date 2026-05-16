@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZATY Planner — Your Personalized Planning System</title>
+  <meta name="description" content="A thoughtful digital planner for daily focus, weekly awareness, and lasting productivity." />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="homepage.css" />
+  <!-- JS loads first so auto-redirect runs as early as possible -->
+  <script src="homepage.js"></script>
+</head>
+<body>
+
+  <!-- ── Auto-redirect overlay ── -->
+  <div class="redirect-overlay" id="redirect-overlay" style="display:none">
+    <div class="redirect-spinner"></div>
+    <div class="redirect-text" id="redirect-text">Opening your planner…</div>
+    <button class="redirect-cancel" id="redirect-cancel">Cancel — let me choose again</button>
+  </div>
+
+  <!-- ── Top bar ── -->
+  <header class="topbar">
+    <a class="brand" href="homepage.html">ZATY Planner</a>
+    <nav class="topbar-nav">
+      <a class="topbar-link" href="#choose">Templates</a>
+      <a class="topbar-link" href="planner.html">Open Planner</a>
+    </nav>
+  </header>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="hero-eyebrow">Digital Planning System</div>
+
+    <h1 class="hero-title">
+      Plan your day.<br>
+      <em>Live your priorities.</em>
+    </h1>
+
+    <p class="hero-tagline">
+      A digital planner that keeps you focused on what matters
+      most — one intentional day at a time.
+    </p>
+
+    <a class="hero-cta" href="#choose" id="hero-cta">
+      Choose Your Template
+      <span class="hero-cta-arrow">→</span>
+    </a>
+
+    <p class="hero-scroll-hint">Daily · Weekly · Monthly coming soon</p>
+  </section>
+
+  <hr class="section-divider" />
+
+  <!-- ── Features strip ── -->
+  <div class="features-strip">
+    <div class="features-inner">
+      <div class="feature-item">
+        <div class="feature-icon">✦</div>
+        <div class="feature-title">A–B–C Prioritization</div>
+        <div class="feature-desc">Franklin's proven system: must do, should do, if time — so your most important work always comes first.</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📅</div>
+        <div class="feature-title">Day &amp; Week Views</div>
+        <div class="feature-desc">Switch between focused daily planning and a week-at-a-glance overview without losing your place.</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">💾</div>
+        <div class="feature-title">Saves Locally</div>
+        <div class="feature-desc">Everything is stored right on your device — no account needed, no data sent anywhere.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Template selector ── -->
+  <section class="template-section" id="choose">
+    <div class="section-header">
+      <div class="section-label">Choose Your View</div>
+      <h2 class="section-title">Select a Planning Template</h2>
+      <p class="section-sub">Pick the view that matches how you like to plan. You can switch any time inside the planner.</p>
+    </div>
+
+    <div class="cards-row">
+
+      <!-- Daily -->
+      <div class="template-card active">
+        <div class="card-icon">📋</div>
+        <div class="card-content">
+          <div class="card-title">Daily Planner</div>
+          <div class="card-desc">Start each morning with a clear plan. Manage tasks by priority, track appointments, and capture notes — all in one focused view.</div>
+          <ul class="card-features">
+            <li>Daily Planning Moment reflection</li>
+            <li>A–B–C prioritized task list</li>
+            <li>Appointment scheduler</li>
+            <li>Notes &amp; record of events</li>
+          </ul>
+        </div>
+        <button class="card-cta" onclick="chooseTemplate('daily')">
+          Choose Daily Planner →
+        </button>
+      </div>
+
+      <!-- Weekly -->
+      <div class="template-card active">
+        <div class="card-icon">🗓️</div>
+        <div class="card-content">
+          <div class="card-title">Weekly Planner</div>
+          <div class="card-desc">See your entire week at a glance. Spot patterns, balance commitments, and stay oriented to your bigger goals.</div>
+          <ul class="card-features">
+            <li>7-day week-at-a-glance grid</li>
+            <li>Quote of the week</li>
+            <li>Priority indicators per day</li>
+            <li>Appointment category dots</li>
+          </ul>
+        </div>
+        <button class="card-cta" onclick="chooseTemplate('weekly')">
+          Choose Weekly Planner →
+        </button>
+      </div>
+
+      <!-- Monthly — coming soon -->
+      <div class="template-card muted">
+        <div class="card-icon">🗃️</div>
+        <div class="card-content">
+          <div class="card-title">Monthly Planner</div>
+          <div class="card-desc">See the big picture. Plan goals, track recurring commitments, and map out the month ahead with a full calendar view.</div>
+          <ul class="card-features">
+            <li>Full monthly calendar grid</li>
+            <li>Goal tracking per month</li>
+            <li>Habit &amp; tracker section</li>
+            <li>Monthly reflection prompt</li>
+          </ul>
+        </div>
+        <span class="card-soon">Coming Soon</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <span class="footer-brand">ZATY Planner</span>
+    <a href="planner.html" class="footer-link">Open Planner →</a>
+  </footer>
+
+</body>
+</html>
