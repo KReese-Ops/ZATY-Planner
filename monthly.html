@@ -42,6 +42,7 @@
   .topbar-left { display: flex; align-items: center; gap: 16px; }
   .brand { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; font-weight: 600; color: var(--accent); letter-spacing: .01em; white-space: nowrap; }
   .brand span { font-size: 11px; font-weight: 300; font-family: 'DM Sans', sans-serif; color: var(--ink-light); margin-left: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .brand small { display: block; font-size: 10px; font-weight: 300; font-family: 'DM Sans', sans-serif; color: var(--ink-faint); letter-spacing: .05em; margin-top: 1px; }
   .home-link { font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); text-decoration: none; letter-spacing: .02em; white-space: nowrap; transition: color .15s; }
   .home-link:hover, .home-link:focus-visible { color: var(--accent); }
   .view-tabs { display: flex; gap: 2px; background: var(--sky); border-radius: 8px; padding: 3px; border: 1px solid var(--border); }
@@ -144,7 +145,7 @@
     <a href="homepage.html"
        class="home-link"
        onclick="try{sessionStorage.setItem('zaty_from_planner','1')}catch(e){}">&#8592; Home</a>
-    <div class="brand">ZATY Planner <span>Monthly</span></div>
+    <div class="brand">ZATY Planner <span>Monthly</span><small id="brand-subtitle" style="display:none"></small></div>
     <div class="view-tabs">
       <a href="planner.html" class="vtab">Day</a>
       <a href="planner.html" class="vtab" onclick="try{sessionStorage.setItem('zaty_open_week','1')}catch(e){}" >Week</a>
@@ -469,6 +470,15 @@ function applyMonthlyCustomSettings() {
     var brandSpan = document.querySelector('.brand span');
     if (brandSpan) brandSpan.textContent = s.displayName;
     document.title = 'ZATY — ' + s.displayName;
+  }
+  var subtitleEl = document.getElementById('brand-subtitle');
+  if (subtitleEl) {
+    if (s.subtitle) {
+      subtitleEl.textContent = s.subtitle;
+      subtitleEl.style.display = '';
+    } else {
+      subtitleEl.style.display = 'none';
+    }
   }
 }
 

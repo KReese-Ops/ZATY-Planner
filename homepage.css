@@ -361,6 +361,24 @@ body {
 }
 .card-cta:hover { background: var(--accent-hover); }
 
+/* Disabled "coming soon" variant of the CTA */
+.card-cta-soon {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  user-select: none;
+}
+
+.coming-soon-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 3px;
+  opacity: 0.85;
+}
+
 .card-soon {
   display: block;
   width: 100%;
