@@ -449,8 +449,34 @@ function saveReflection() {
   } catch (e) {}
 }
 
+// ── CUSTOM TEMPLATE SETTINGS ─────────────────────────────────────────────
+function applyMonthlyCustomSettings() {
+  var raw = null;
+  try { raw = localStorage.getItem('monthlyPlannerSettings'); } catch(e) {}
+  if (!raw) return;
+  var s;
+  try { s = JSON.parse(raw); } catch(e) { return; }
+  if (!s) return;
+
+  if (s.bgColor)     document.body.style.background = s.bgColor;
+  if (s.accentColor) {
+    var root = document.documentElement;
+    root.style.setProperty('--accent',       s.accentColor);
+    root.style.setProperty('--accent-hover', s.accentHover || s.accentColor);
+    root.style.setProperty('--accent-light', s.accentLight || '#E8F0F8');
+  }
+  if (s.displayName) {
+    var brandSpan = document.querySelector('.brand span');
+    if (brandSpan) brandSpan.textContent = s.displayName;
+    document.title = 'ZATY — ' + s.displayName;
+  }
+}
+
 // ── INIT ─────────────────────────────────────────────────────────────────
 (function init() {
+  // Apply custom template settings first so the colors are set before render.
+  applyMonthlyCustomSettings();
+
   // If the planner passed back a month context (e.g., user navigated here
   // from a specific month in the planner), honour it.
   var params = new URLSearchParams(window.location.search);

@@ -6,27 +6,60 @@
   var LAST_VIEW_KEY = 'zaty_last_view';
   var DEST = { daily: 'planner.html', weekly: 'planner.html', monthly: 'monthly.html' };
 
-  // ── Template selection ───────────────────────────────────────────────────
-  // Defined first so it is always reachable — including after Cancel on the
-  // redirect overlay or any other early-return branch below.
-  function choose(template) {
-    if (!DEST[template]) return;
-    localStorage.setItem(PREF_KEY, template);
-    // Persist the view so planner.html can restore it on next open.
-    // 'monthly' goes to a different page, so no view key is needed for it.
-    if (template === 'weekly') {
-      localStorage.setItem(LAST_VIEW_KEY, 'week');
-    } else if (template === 'daily') {
-      localStorage.setItem(LAST_VIEW_KEY, 'day');
-    }
-    window.location.href = DEST[template];
+  // ── Settings keys (written by customize-template.html) ──────────────────
+  var SETTINGS_KEYS = {
+    daily:   'dailyPlannerSettings',
+    weekly:  'weeklyPlannerSettings',
+    monthly: 'monthlyPlannerSettings'
+  };
+
+  // ── "My Planner" — open saved planner directly ───────────────────────────
+  // Navigates to the appropriate planner page. The planner pages read their
+  // own settings from localStorage on init and apply them automatically.
+  function openMyPlanner(type) {
+    if (!DEST[type]) return;
+    // Remember the view so planner.html opens on the right tab.
+    try {
+      if (type === 'weekly')      localStorage.setItem(LAST_VIEW_KEY, 'week');
+      else if (type === 'daily')  localStorage.setItem(LAST_VIEW_KEY, 'day');
+    } catch(e) {}
+    window.location.href = DEST[type];
+  }
+  window.openMyPlanner = openMyPlanner;
+
+  // ── Update "my planner" link visual state ────────────────────────────────
+  // Adds .has-settings when the user has already customized that planner,
+  // removes it when no settings exist, and updates the tooltip text.
+  function updateMyPlannerLinks() {
+    document.querySelectorAll('.my-planner-link').forEach(function (link) {
+      var type = link.getAttribute('data-type');
+      if (!type || !SETTINGS_KEYS[type]) return;
+      var hasSettings = false;
+      try { hasSettings = !!localStorage.getItem(SETTINGS_KEYS[type]); } catch(e) {}
+      link.classList.toggle('has-settings', hasSettings);
+      link.title = hasSettings
+        ? 'Open your customized ' + type + ' planner'
+        : 'Customize your ' + type + ' planner — create a template below';
+    });
   }
 
-  // Expose globally so onclick= attributes work.
+  // ── Template selection (legacy path — kept for backward compat) ──────────
+  // The "choose" path is no longer called by the homepage cards (they go to
+  // customize-template.html instead), but may still be triggered elsewhere.
+  function choose(template) {
+    if (!DEST[template]) return;
+    try {
+      localStorage.setItem(PREF_KEY, template);
+      if (template === 'weekly')     localStorage.setItem(LAST_VIEW_KEY, 'week');
+      else if (template === 'daily') localStorage.setItem(LAST_VIEW_KEY, 'day');
+    } catch(e) {}
+    window.location.href = DEST[template];
+  }
   window.chooseTemplate = choose;
 
-  // ── Scroll CTA ───────────────────────────────────────────────────────────
+  // ── DOMContentLoaded setup ───────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function () {
+    // Smooth-scroll CTA
     var cta = document.getElementById('hero-cta');
     if (cta) {
       cta.addEventListener('click', function (e) {
@@ -35,19 +68,21 @@
         if (target) target.scrollIntoView({ behavior: 'smooth' });
       });
     }
+    // Reflect saved settings state in the "my planner" links
+    updateMyPlannerLinks();
   });
 
   // ── Auto-redirect ────────────────────────────────────────────────────────
   // Skip when the user deliberately navigated back from the planner.
-  // The planner's Home link sets this flag in sessionStorage before navigating.
   var fromPlanner = false;
   try {
     fromPlanner = sessionStorage.getItem('zaty_from_planner') === '1';
     if (fromPlanner) sessionStorage.removeItem('zaty_from_planner');
-  } catch (e) { /* sessionStorage blocked — treat as fresh visit */ }
+  } catch (e) {}
   if (fromPlanner) return;
 
-  var saved = localStorage.getItem(PREF_KEY);
+  var saved = null;
+  try { saved = localStorage.getItem(PREF_KEY); } catch(e) {}
 
   if (saved && DEST[saved]) {
     showRedirectOverlay(saved);
@@ -59,8 +94,6 @@
     var msg     = document.getElementById('redirect-text');
 
     if (!overlay) {
-      // Script ran before DOM was ready — wait for it.
-      // Use a named handler so only one listener is ever registered.
       document.addEventListener('DOMContentLoaded', function onReady() {
         document.removeEventListener('DOMContentLoaded', onReady);
         showRedirectOverlay(template);
@@ -73,19 +106,15 @@
     overlay.style.display = 'flex';
 
     var dest = DEST[template] || 'planner.html';
-    var timer = setTimeout(function () {
-      window.location.href = dest;
-    }, 1200);
+    var timer = setTimeout(function () { window.location.href = dest; }, 1200);
 
-    // Use onclick assignment (not addEventListener) so only one handler is
-    // ever active — prevents double-fire if this function is somehow called
-    // more than once (e.g. from a DOMContentLoaded retry above).
     document.getElementById('redirect-cancel').onclick = function () {
       clearTimeout(timer);
       overlay.style.display = 'none';
-      localStorage.removeItem(PREF_KEY);
-      localStorage.removeItem(LAST_VIEW_KEY);
-      // chooseTemplate is already on window — the cards work immediately.
+      try {
+        localStorage.removeItem(PREF_KEY);
+        localStorage.removeItem(LAST_VIEW_KEY);
+      } catch(e) {}
     };
   }
 

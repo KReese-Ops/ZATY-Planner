@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Customize Template — ZATY Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="homepage.css" />
+<style>
+/* ── Page layout ── */
+.customize-main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.customize-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.customize-header .section-title {
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  margin-bottom: 0.5rem;
+}
+
+.type-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: var(--accent-light);
+  border: 1px solid var(--accent-mid);
+  border-radius: 20px;
+  padding: 3px 12px;
+  margin-bottom: 1rem;
+}
+
+/* ── Live Preview ── */
+.preview-panel {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+  transition: border-color 0.3s;
+}
+
+.preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.preview-brand {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.preview-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.preview-tab {
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  border: none;
+  cursor: default;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  color: #fff;
+}
+
+.preview-body {
+  padding: 14px;
+  min-height: 120px;
+}
+
+.preview-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.preview-card-label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+
+.preview-card-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.preview-line {
+  height: 7px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  opacity: 0.15;
+}
+
+.preview-btn {
+  display: inline-block;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  margin-top: 6px;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+}
+
+/* ── Settings sections ── */
+.settings-section {
+  background: var(--warm-white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.settings-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.9rem;
+}
+
+.settings-label .optional-tag {
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  text-transform: none;
+  margin-left: 6px;
+}
+
+/* ── Theme grid ── */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.theme-swatch {
+  border-radius: 10px;
+  padding: 10px 8px 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  text-align: center;
+  background: var(--cream);
+}
+
+.theme-swatch:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-swatch.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.swatch-preview {
+  width: 100%;
+  height: 28px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+  gap: 5px;
+}
+
+.swatch-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.8);
+  flex-shrink: 0;
+}
+
+.swatch-line {
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.5);
+  flex: 1;
+}
+
+.swatch-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-light);
+}
+
+/* ── Text inputs ── */
+.settings-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+
+.settings-input::placeholder { color: var(--ink-faint); }
+
+.settings-hint {
+  font-size: 11px;
+  color: var(--ink-faint);
+  margin-top: 5px;
+}
+
+/* ── Prompts grid (daily only) ── */
+.prompts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.prompt-field label {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.prompt-field input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.prompt-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+
+.prompt-field input::placeholder { color: var(--ink-faint); font-style: italic; }
+
+/* ── Actions ── */
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.save-btn {
+  background: var(--accent);
+  color: #FFF8F0;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.88rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  box-shadow: 0 2px 8px rgba(92,74,42,0.2);
+}
+
+.save-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.reset-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.15s;
+  padding: 0;
+}
+
+.reset-btn:hover { color: #8B2500; }
+
+/* ── Saved toast ── */
+.saved-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--accent);
+  color: #FFF8F0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 22px;
+  border-radius: 30px;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.saved-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .theme-grid   { grid-template-columns: repeat(2, 1fr); }
+  .prompts-grid { grid-template-columns: 1fr; }
+  .action-row   { flex-direction: column; align-items: stretch; }
+  .save-btn     { text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Top bar ── -->
+<header class="topbar">
+  <a class="brand" href="homepage.html">ZATY Planner</a>
+  <nav class="topbar-nav">
+    <a class="topbar-link" href="homepage.html">← Back to Templates</a>
+  </nav>
+</header>
+
+<!-- ── Main content ── -->
+<main class="customize-main">
+
+  <div class="customize-header">
+    <div class="type-badge" id="type-badge">Daily Planner</div>
+    <h1 class="section-title">Customize Your Planner</h1>
+    <p class="section-sub">Pick a color theme, add your name, and personalize your reflection prompts — all saved to your device.</p>
+  </div>
+
+  <!-- ── Live Preview ── -->
+  <div class="preview-panel" id="preview-panel">
+    <div class="preview-bar" id="preview-bar">
+      <span class="preview-brand" id="preview-brand-name">ZATY Planner</span>
+      <div class="preview-tabs">
+        <span class="preview-tab" id="preview-tab-1">Day</span>
+        <span class="preview-tab" id="preview-tab-2">Week</span>
+        <span class="preview-tab" id="preview-tab-3" style="display:none">Month</span>
+      </div>
+    </div>
+    <div class="preview-body" id="preview-body">
+      <div class="preview-card" id="preview-card">
+        <div class="preview-card-label" id="preview-card-label">Daily Planning Moment</div>
+        <div class="preview-card-title" id="preview-card-title">Daily Planning Moment</div>
+        <div class="preview-line" id="preview-line-1"></div>
+        <div class="preview-line" id="preview-line-2" style="width:68%"></div>
+        <span class="preview-btn" id="preview-btn">Add Task</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Theme ── -->
+  <div class="settings-section">
+    <div class="settings-label">Color Theme</div>
+    <div class="theme-grid" id="theme-grid"></div>
+  </div>
+
+  <!-- ── Display name ── -->
+  <div class="settings-section">
+    <div class="settings-label">Planner Name <span class="optional-tag">optional</span></div>
+    <input type="text" class="settings-input" id="display-name" maxlength="40"
+      placeholder="e.g. Katy's Daily Planner" autocomplete="off" />
+    <div class="settings-hint">Replaces "Daily Edition" in the planner's top bar.</div>
+  </div>
+
+  <!-- ── Subtitle ── -->
+  <div class="settings-section">
+    <div class="settings-label">Subtitle <span class="optional-tag">optional</span></div>
+    <input type="text" class="settings-input" id="subtitle-input" maxlength="60"
+      placeholder="e.g. Focus · Clarity · Action" autocomplete="off" />
+    <div class="settings-hint">A short tagline shown beneath the planner name.</div>
+  </div>
+
+  <!-- ── Reflection prompts (daily only) ── -->
+  <div class="settings-section" id="prompts-section" style="display:none">
+    <div class="settings-label">Reflection Prompts <span class="optional-tag">optional</span></div>
+    <div class="prompts-grid">
+      <div class="prompt-field">
+        <label>Morning Focus</label>
+        <input type="text" id="prompt-focus"
+          placeholder="What is my most important focus today?" />
+      </div>
+      <div class="prompt-field">
+        <label>Daily Success</label>
+        <input type="text" id="prompt-success"
+          placeholder="What would make today a success?" />
+      </div>
+      <div class="prompt-field">
+        <label>Gratitude</label>
+        <input type="text" id="prompt-grateful"
+          placeholder="What am I grateful for this morning?" />
+      </div>
+      <div class="prompt-field">
+        <label>Evening Reflection</label>
+        <input type="text" id="prompt-evening"
+          placeholder="Evening reflection — what did I accomplish?" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Actions ── -->
+  <div class="action-row">
+    <button class="save-btn" id="save-btn" onclick="saveSettings()">
+      Save &amp; Open Planner →
+    </button>
+    <button class="reset-btn" onclick="resetSettings()">Reset to defaults</button>
+  </div>
+
+</main>
+
+<!-- ── Toast ── -->
+<div class="saved-toast" id="saved-toast">✓ Template saved!</div>
+
+<script>
+// ── THEME DEFINITIONS ────────────────────────────────────────────────────
+var THEMES = [
+  { id: 'ocean',    name: 'Ocean Blue',   bg: '#F0F5FA', accent: '#4A6FA5', accentHover: '#3A5A90', accentLight: '#E8F0F8' },
+  { id: 'sage',     name: 'Sage Green',   bg: '#F0FAF4', accent: '#2D7A5E', accentHover: '#236145', accentLight: '#E0F5EB' },
+  { id: 'peach',    name: 'Warm Peach',   bg: '#FFF2E6', accent: '#C07A3A', accentHover: '#A86020', accentLight: '#FDEBD0' },
+  { id: 'lavender', name: 'Lavender',     bg: '#F4F0FA', accent: '#6B4A9E', accentHover: '#563B80', accentLight: '#EDE5F8' },
+  { id: 'rose',     name: 'Rose',         bg: '#FAF0F0', accent: '#8B3060', accentHover: '#712650', accentLight: '#F8E0EC' },
+  { id: 'slate',    name: 'Cool Slate',   bg: '#F0F4F8', accent: '#4A5568', accentHover: '#3A4456', accentLight: '#E8EDF4' }
+];
+
+var DEFAULT_THEMES = { daily: 'ocean', weekly: 'ocean', monthly: 'peach' };
+
+var DEST = { daily: 'planner.html', weekly: 'planner.html', monthly: 'monthly.html' };
+
+var SETTINGS_KEY_MAP = {
+  daily:   'dailyPlannerSettings',
+  weekly:  'weeklyPlannerSettings',
+  monthly: 'monthlyPlannerSettings'
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────
+var plannerType  = 'daily';
+var selectedTheme = THEMES[0];
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+(function init() {
+  // Read type from URL query param
+  var params = new URLSearchParams(window.location.search);
+  var t = params.get('type');
+  if (t === 'weekly' || t === 'monthly' || t === 'daily') plannerType = t;
+
+  // Page title / badge
+  var labels = { daily: 'Daily Planner', weekly: 'Weekly Planner', monthly: 'Monthly Planner' };
+  document.title = 'Customize ' + labels[plannerType] + ' — ZATY Planner';
+  document.getElementById('type-badge').textContent = labels[plannerType];
+
+  // Show/hide daily-only sections
+  document.getElementById('prompts-section').style.display = (plannerType === 'daily') ? '' : 'none';
+
+  // Adjust preview tabs
+  if (plannerType === 'monthly') {
+    document.getElementById('preview-tab-1').style.display = 'none';
+    document.getElementById('preview-tab-2').style.display = 'none';
+    document.getElementById('preview-tab-3').style.display = '';
+  }
+
+  // Build theme grid
+  buildThemeGrid();
+
+  // Load saved settings if any, otherwise pick a type-appropriate default
+  var raw = null;
+  try { raw = localStorage.getItem(SETTINGS_KEY_MAP[plannerType]); } catch(e) {}
+  if (raw) {
+    try {
+      var saved = JSON.parse(raw);
+      // Apply theme
+      var theme = THEMES.find(function(t) { return t.id === saved.themeId; }) || THEMES[0];
+      selectTheme(theme, false);
+      // Apply text fields
+      if (saved.displayName) document.getElementById('display-name').value = saved.displayName;
+      if (saved.subtitle)    document.getElementById('subtitle-input').value = saved.subtitle;
+      if (plannerType === 'daily' && saved.prompts) {
+        ['focus','success','grateful','evening'].forEach(function(k) {
+          if (saved.prompts[k]) document.getElementById('prompt-' + k).value = saved.prompts[k];
+        });
+      }
+    } catch(e) {}
+  } else {
+    // Select the type-appropriate default theme
+    var defId = DEFAULT_THEMES[plannerType] || 'ocean';
+    var defTheme = THEMES.find(function(t) { return t.id === defId; }) || THEMES[0];
+    selectTheme(defTheme, false);
+  }
+
+  // Live-update preview on text input
+  document.getElementById('display-name').addEventListener('input', updatePreview);
+  document.getElementById('subtitle-input').addEventListener('input', updatePreview);
+
+  updatePreview();
+})();
+
+// ── THEME GRID ───────────────────────────────────────────────────────────
+function buildThemeGrid() {
+  var grid = document.getElementById('theme-grid');
+  grid.innerHTML = '';
+  THEMES.forEach(function(theme) {
+    var swatch = document.createElement('div');
+    swatch.className = 'theme-swatch';
+    swatch.setAttribute('data-theme-id', theme.id);
+    swatch.innerHTML =
+      '<div class="swatch-preview" style="background:' + theme.bg + '">'
+      + '<div class="swatch-dot" style="background:' + theme.accent + '"></div>'
+      + '<div class="swatch-line" style="background:' + theme.accent + '"></div>'
+      + '</div>'
+      + '<div class="swatch-name">' + theme.name + '</div>';
+    swatch.addEventListener('click', function() { selectTheme(theme, true); });
+    grid.appendChild(swatch);
+  });
+}
+
+function selectTheme(theme, updatePreviewFlag) {
+  selectedTheme = theme;
+  // Update swatch selection highlight
+  document.querySelectorAll('.theme-swatch').forEach(function(s) {
+    s.classList.toggle('selected', s.getAttribute('data-theme-id') === theme.id);
+  });
+  if (updatePreviewFlag !== false) updatePreview();
+}
+
+// ── LIVE PREVIEW ─────────────────────────────────────────────────────────
+function updatePreview() {
+  var theme = selectedTheme;
+  var name  = document.getElementById('display-name').value.trim();
+
+  // Background
+  document.getElementById('preview-body').style.background = theme.bg;
+
+  // Topbar accent elements
+  document.getElementById('preview-brand-name').style.color = theme.accent;
+  var tabs = document.querySelectorAll('.preview-tab');
+  tabs.forEach(function(tab) { tab.style.background = theme.accentLight; tab.style.color = theme.accent; });
+  // First/active tab uses full accent
+  if (tabs[0]) { tabs[0].style.background = theme.accent; tabs[0].style.color = '#fff'; }
+  if (plannerType === 'monthly' && tabs[2]) {
+    tabs[2].style.background = theme.accent; tabs[2].style.color = '#fff';
+  }
+
+  // Card
+  document.getElementById('preview-line-1').style.background = theme.accent;
+  document.getElementById('preview-line-2').style.background = theme.accent;
+  document.getElementById('preview-btn').style.background    = theme.accent;
+
+  // Card title label
+  var cardTitle  = { daily: 'Daily Planning Moment', weekly: 'Week at a Glance', monthly: 'Monthly Overview' };
+  var labelText  = name || 'ZATY Planner';
+  document.getElementById('preview-brand-name').textContent = labelText;
+  document.getElementById('preview-card-title').textContent = cardTitle[plannerType] || '';
+  document.getElementById('preview-card-label').textContent = (cardTitle[plannerType] || '').toUpperCase();
+}
+
+// ── SAVE ─────────────────────────────────────────────────────────────────
+function saveSettings() {
+  var settings = {
+    type:         plannerType,
+    themeId:      selectedTheme.id,
+    bgColor:      selectedTheme.bg,
+    accentColor:  selectedTheme.accent,
+    accentHover:  selectedTheme.accentHover,
+    accentLight:  selectedTheme.accentLight,
+    displayName:  document.getElementById('display-name').value.trim(),
+    subtitle:     document.getElementById('subtitle-input').value.trim()
+  };
+
+  if (plannerType === 'daily') {
+    settings.prompts = {
+      focus:   document.getElementById('prompt-focus').value.trim(),
+      success: document.getElementById('prompt-success').value.trim(),
+      grateful:document.getElementById('prompt-grateful').value.trim(),
+      evening: document.getElementById('prompt-evening').value.trim()
+    };
+  }
+
+  try {
+    localStorage.setItem(SETTINGS_KEY_MAP[plannerType], JSON.stringify(settings));
+    // Also record the last-chosen template preference
+    localStorage.setItem('zaty_template', plannerType);
+    if (plannerType === 'weekly')     localStorage.setItem('zaty_last_view', 'week');
+    else if (plannerType === 'daily') localStorage.setItem('zaty_last_view', 'day');
+  } catch(e) {
+    alert('Could not save settings. Your browser may be blocking localStorage.');
+    return;
+  }
+
+  // Show toast then navigate
+  showToast('✓ Template saved!');
+  setTimeout(function() {
+    window.location.href = DEST[plannerType] || 'planner.html';
+  }, 900);
+}
+
+// ── RESET ────────────────────────────────────────────────────────────────
+function resetSettings() {
+  if (!confirm('Reset all customizations for the ' + plannerType + ' planner to defaults?\n\nThis cannot be undone.')) return;
+  try { localStorage.removeItem(SETTINGS_KEY_MAP[plannerType]); } catch(e) {}
+
+  // Clear form
+  document.getElementById('display-name').value   = '';
+  document.getElementById('subtitle-input').value = '';
+  if (plannerType === 'daily') {
+    ['focus','success','grateful','evening'].forEach(function(k) {
+      document.getElementById('prompt-' + k).value = '';
+    });
+  }
+
+  // Re-select default theme
+  var defId = DEFAULT_THEMES[plannerType] || 'ocean';
+  var defTheme = THEMES.find(function(t) { return t.id === defId; }) || THEMES[0];
+  selectTheme(defTheme, true);
+
+  showToast('✓ Reset to defaults');
+}
+
+// ── TOAST ────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('saved-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+</script>
+</body>
+</html>
