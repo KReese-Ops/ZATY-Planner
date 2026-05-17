@@ -85,6 +85,11 @@
 
       <!-- Daily -->
       <div class="template-card active">
+        <a class="my-planner-link" href="#" data-type="daily"
+           onclick="openMyPlanner('daily'); return false;">
+          <span class="my-planner-dot" aria-hidden="true"></span>
+          my daily planner
+        </a>
         <div class="card-icon">📋</div>
         <div class="card-content">
           <div class="card-title">Daily Planner</div>
@@ -96,13 +101,18 @@
             <li>Notes &amp; record of events</li>
           </ul>
         </div>
-        <button class="card-cta" onclick="chooseTemplate('daily')">
-          Choose Daily Planner →
-        </button>
+        <a href="customize-template.html?type=daily" class="card-cta">
+          create my daily planner template →
+        </a>
       </div>
 
       <!-- Weekly -->
       <div class="template-card active">
+        <a class="my-planner-link" href="#" data-type="weekly"
+           onclick="openMyPlanner('weekly'); return false;">
+          <span class="my-planner-dot" aria-hidden="true"></span>
+          my weekly planner
+        </a>
         <div class="card-icon">🗓️</div>
         <div class="card-content">
           <div class="card-title">Weekly Planner</div>
@@ -114,13 +124,18 @@
             <li>Appointment category dots</li>
           </ul>
         </div>
-        <button class="card-cta" onclick="chooseTemplate('weekly')">
-          Choose Weekly Planner →
-        </button>
+        <a href="customize-template.html?type=weekly" class="card-cta">
+          create my weekly planner template →
+        </a>
       </div>
 
       <!-- Monthly -->
       <div class="template-card active">
+        <a class="my-planner-link" href="#" data-type="monthly"
+           onclick="openMyPlanner('monthly'); return false;">
+          <span class="my-planner-dot" aria-hidden="true"></span>
+          my monthly planner
+        </a>
         <div class="card-icon">🗃️</div>
         <div class="card-content">
           <div class="card-title">Monthly Planner</div>
@@ -132,9 +147,9 @@
             <li>Click any day to open planner</li>
           </ul>
         </div>
-        <button class="card-cta" onclick="chooseTemplate('monthly')">
-          Choose Monthly Planner →
-        </button>
+        <a href="customize-template.html?type=monthly" class="card-cta">
+          create my monthly planner template →
+        </a>
       </div>
 
     </div>

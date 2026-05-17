@@ -235,19 +235,19 @@
       </div>
       <div class="pm-grid">
         <div class="pm-field">
-          <label>What is my most important focus today?</label>
+          <label id="pm-focus-label">What is my most important focus today?</label>
           <textarea rows="2" id="pm-focus" placeholder="Write your main intention…" onblur="savePlanning()"></textarea>
         </div>
         <div class="pm-field">
-          <label>What would make today a success?</label>
+          <label id="pm-success-label">What would make today a success?</label>
           <textarea rows="2" id="pm-success" placeholder="One or two outcomes…" onblur="savePlanning()"></textarea>
         </div>
         <div class="pm-field">
-          <label>What am I grateful for this morning?</label>
+          <label id="pm-grateful-label">What am I grateful for this morning?</label>
           <textarea rows="2" id="pm-grateful" placeholder="A person, moment, or thing…" onblur="savePlanning()"></textarea>
         </div>
         <div class="pm-field">
-          <label>Evening reflection — what did I accomplish?</label>
+          <label id="pm-evening-label">Evening reflection — what did I accomplish?</label>
           <textarea rows="2" id="pm-evening" placeholder="Review your day…" onblur="savePlanning()"></textarea>
         </div>
       </div>
@@ -326,7 +326,7 @@
       <!-- Notes -->
       <div class="card card-full">
         <div class="card-header">
-          <span class="card-title">Notes &amp; Record of Events</span>
+          <span class="card-title" id="notes-title">Notes &amp; Record of Events</span>
         </div>
         <div class="card-body">
           <textarea class="notes-area" id="notes-area" rows="5"
@@ -376,6 +376,43 @@ today.setHours(0,0,0,0);
 var current = new Date(today);
 var currentView = 'day';
 var calendarPlaceholderShown = false;
+
+// ── CUSTOM TEMPLATE SETTINGS ─────────────────────────────
+// Reads dailyPlannerSettings or weeklyPlannerSettings from localStorage
+// and applies background color, accent colors, display name, and (for
+// daily) custom reflection prompt labels.
+function applyPlannerCustomSettings(settingsKey) {
+  var raw = readStorage(settingsKey);
+  if (!raw) return;
+  var s;
+  try { s = JSON.parse(raw); } catch(e) { return; }
+  if (!s) return;
+
+  var root = document.documentElement;
+  if (s.bgColor)      root.style.setProperty('--sky',          s.bgColor);
+  if (s.accentColor)  root.style.setProperty('--accent',       s.accentColor);
+  if (s.accentHover)  root.style.setProperty('--accent-hover', s.accentHover);
+  if (s.accentLight)  root.style.setProperty('--accent-light', s.accentLight);
+
+  if (s.displayName) {
+    var brandSpan = document.querySelector('.brand span');
+    if (brandSpan) brandSpan.textContent = s.displayName;
+    document.title = 'ZATY — ' + s.displayName;
+  }
+
+  if (s.prompts) {
+    var labelMap = {
+      focus: 'pm-focus-label', success: 'pm-success-label',
+      grateful: 'pm-grateful-label', evening: 'pm-evening-label'
+    };
+    Object.keys(labelMap).forEach(function(k) {
+      if (s.prompts[k]) {
+        var el = document.getElementById(labelMap[k]);
+        if (el) el.textContent = s.prompts[k];
+      }
+    });
+  }
+}
 
 // ── KEY HELPERS ──────────────────────────────────────────
 function pad2(n) {
@@ -884,6 +921,9 @@ function setView(v, btn) {
   // Update brand subtitle
   var brandSpan = document.querySelector('.brand span');
   if (brandSpan) brandSpan.textContent = v === 'week' ? 'Weekly Edition' : 'Daily Edition';
+  // Re-apply the settings for the new view (weekly may have different theme)
+  if (v === 'week') applyPlannerCustomSettings('weeklyPlannerSettings');
+  else              applyPlannerCustomSettings('dailyPlannerSettings');
   if (v === 'week') renderWeek();
 }
 
@@ -926,6 +966,11 @@ function escHtml(str) {
     calendarPlaceholderShown = true;
     applyCalConnectedUI();
   }
+
+  // Apply custom template settings.  Daily settings are the base; weekly
+  // settings are layered on top when the view is (or becomes) week view.
+  applyPlannerCustomSettings('dailyPlannerSettings');
+  if (currentView === 'week') applyPlannerCustomSettings('weeklyPlannerSettings');
 
   // Handle startup rollover (opening app fresh on a new day)
   var startupRolled = checkStartupRollover();

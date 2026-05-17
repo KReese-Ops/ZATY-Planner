@@ -218,7 +218,7 @@ body {
   background: var(--warm-white);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 2rem 1.6rem 1.75rem;
+  padding: 1.25rem 1.6rem 1.75rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -226,6 +226,42 @@ body {
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
   position: relative;
   overflow: hidden;
+}
+
+/* ── MY PLANNER LINK ── */
+.my-planner-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  padding: 3px 0;
+  transition: color 0.15s;
+  align-self: flex-start;
+}
+.my-planner-link:hover { color: var(--accent); }
+
+.my-planner-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-dark);
+  background: transparent;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+  display: inline-block;
+}
+.my-planner-link:hover .my-planner-dot { border-color: var(--accent); }
+
+/* Active state: settings are saved for this planner type */
+.my-planner-link.has-settings { color: var(--accent); font-weight: 600; }
+.my-planner-link.has-settings .my-planner-dot {
+  background: var(--gold);
+  border-color: var(--gold);
 }
 
 .template-card.active:hover {
