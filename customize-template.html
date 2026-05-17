@@ -9,43 +9,53 @@
 <style>
 /* ── Page layout ── */
 .customize-main {
-  max-width: 700px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 3rem 1.5rem 5rem;
+  padding: 3.5rem 1.5rem 5rem;
 }
 
+/* ── Page header ── */
 .customize-header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2.75rem;
 }
 
 .customize-header .section-title {
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
-  margin-bottom: 0.5rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: 0.6rem;
 }
 
+/* Matches hero-eyebrow / section-label style from homepage */
 .type-badge {
-  display: inline-block;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gold);
-  background: var(--accent-light);
-  border: 1px solid var(--accent-mid);
-  border-radius: 20px;
-  padding: 3px 12px;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.type-badge::before,
+.type-badge::after {
+  content: '';
+  display: block;
+  width: 30px;
+  height: 1px;
+  background: var(--accent-mid);
 }
 
 /* ── Live Preview ── */
 .preview-panel {
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1.5px solid var(--border);
   box-shadow: var(--shadow-md);
-  margin-bottom: 2rem;
-  transition: border-color 0.3s;
+  margin-bottom: 1.75rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .preview-bar {
@@ -53,8 +63,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: #fff;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: var(--warm-white);
+  border-bottom: 1px solid var(--border);
 }
 
 .preview-brand {
@@ -66,13 +76,17 @@
 
 .preview-tabs {
   display: flex;
-  gap: 4px;
+  gap: 3px;
+  background: var(--cream);
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
 }
 
 .preview-tab {
   font-size: 10px;
   padding: 3px 9px;
-  border-radius: 5px;
+  border-radius: 4px;
   border: none;
   cursor: default;
   font-family: 'DM Sans', sans-serif;
@@ -82,72 +96,108 @@
 
 .preview-body {
   padding: 14px;
-  min-height: 120px;
+  min-height: 130px;
+  transition: background 0.3s;
 }
 
 .preview-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px 12px;
-  border: 1px solid rgba(0,0,0,0.08);
+  background: var(--warm-white);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Accent stripe on preview card matching real planner cards */
+.preview-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--preview-accent, var(--accent-mid));
+  transition: background 0.3s;
 }
 
 .preview-card-label {
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #aaa;
-  margin-bottom: 6px;
+  color: var(--ink-faint);
+  margin-bottom: 7px;
+  margin-top: 4px;
 }
 
 .preview-card-title {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 8px;
+  color: var(--ink);
+  margin-bottom: 9px;
 }
 
 .preview-line {
   height: 7px;
   border-radius: 4px;
   margin-bottom: 5px;
-  opacity: 0.15;
+  opacity: 0.12;
+  transition: background 0.3s;
 }
 
 .preview-btn {
   display: inline-block;
   font-size: 10px;
-  padding: 4px 10px;
+  padding: 4px 11px;
   border-radius: 5px;
-  margin-top: 6px;
+  margin-top: 7px;
   color: #fff;
   font-family: 'DM Sans', sans-serif;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: background 0.3s;
 }
 
-/* ── Settings sections ── */
+/* ── Settings sections — match homepage template card style ── */
 .settings-section {
   background: var(--warm-white);
   border: 1.5px solid var(--border);
-  border-radius: 14px;
-  padding: 1.4rem 1.6rem;
-  margin-bottom: 1.1rem;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.6rem 1.4rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* Top accent stripe, identical to homepage template cards */
+.settings-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent-mid);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transition: background 0.2s;
+}
+
+/* Section labels now use homepage gold, matching section-label / card-title style */
 .settings-label {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--gold);
   margin-bottom: 0.9rem;
 }
 
 .settings-label .optional-tag {
   font-weight: 400;
   font-size: 10px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: var(--ink-faint);
   text-transform: none;
   margin-left: 6px;
@@ -160,31 +210,33 @@
   gap: 10px;
 }
 
+/* Swatches start with the same visible border as homepage cards */
 .theme-swatch {
-  border-radius: 10px;
-  padding: 10px 8px 8px;
+  border-radius: var(--radius);
+  padding: 10px 8px 9px;
   cursor: pointer;
-  border: 2px solid transparent;
-  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
-  text-align: center;
+  border: 1.5px solid var(--border);
   background: var(--cream);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  text-align: center;
 }
 
 .theme-swatch:hover {
-  transform: translateY(-2px);
+  border-color: var(--accent);
   box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .theme-swatch.selected {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-light);
+  box-shadow: 0 0 0 3px var(--accent-light), var(--shadow-sm);
 }
 
 .swatch-preview {
   width: 100%;
   height: 28px;
   border-radius: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -196,15 +248,15 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.8);
   flex-shrink: 0;
+  opacity: 0.9;
 }
 
 .swatch-line {
   height: 5px;
   border-radius: 3px;
-  background: rgba(255,255,255,0.5);
   flex: 1;
+  opacity: 0.5;
 }
 
 .swatch-name {
@@ -229,7 +281,7 @@
 .settings-input:focus {
   outline: none;
   border-color: var(--accent);
-  background: #fff;
+  background: var(--warm-white);
 }
 
 .settings-input::placeholder { color: var(--ink-faint); }
@@ -237,7 +289,8 @@
 .settings-hint {
   font-size: 11px;
   color: var(--ink-faint);
-  margin-top: 5px;
+  margin-top: 6px;
+  line-height: 1.5;
 }
 
 /* ── Prompts grid (daily only) ── */
@@ -270,21 +323,24 @@
 .prompt-field input:focus {
   outline: none;
   border-color: var(--accent);
-  background: #fff;
+  background: var(--warm-white);
 }
 
 .prompt-field input::placeholder { color: var(--ink-faint); font-style: italic; }
 
-/* ── Actions ── */
+/* ── Actions — save button matches hero-cta / card-cta style ── */
 .action-row {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
   flex-wrap: wrap;
 }
 
 .save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: var(--accent);
   color: #FFF8F0;
   border: none;
@@ -293,16 +349,19 @@
   font-size: 0.88rem;
   font-family: 'DM Sans', sans-serif;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
-  box-shadow: 0 2px 8px rgba(92,74,42,0.2);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(92,74,42,0.25);
 }
 
 .save-btn:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(92,74,42,0.30);
 }
+
+.save-btn:active { transform: translateY(0); }
 
 .reset-btn {
   background: none;
@@ -344,11 +403,12 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 560px) {
+@media (max-width: 600px) {
   .theme-grid   { grid-template-columns: repeat(2, 1fr); }
   .prompts-grid { grid-template-columns: 1fr; }
   .action-row   { flex-direction: column; align-items: stretch; }
-  .save-btn     { text-align: center; }
+  .save-btn     { justify-content: center; }
+  .customize-main { padding: 2.5rem 1.25rem 4rem; }
 }
 </style>
 </head>
@@ -358,7 +418,7 @@
 <header class="topbar">
   <a class="brand" href="homepage.html">ZATY Planner</a>
   <nav class="topbar-nav">
-    <a class="topbar-link" href="homepage.html">← Back to Templates</a>
+    <a class="topbar-link" href="homepage.html">← Back to Homepage</a>
   </nav>
 </header>
 
@@ -598,6 +658,8 @@ function updatePreview() {
   document.getElementById('preview-line-1').style.background = theme.accent;
   document.getElementById('preview-line-2').style.background = theme.accent;
   document.getElementById('preview-btn').style.background    = theme.accent;
+  // Update the preview-card top-stripe colour via custom property
+  document.getElementById('preview-card').style.setProperty('--preview-accent', theme.accent);
 
   // Card title label
   var cardTitle  = { daily: 'Daily Planning Moment', weekly: 'Week at a Glance', monthly: 'Monthly Overview' };
@@ -663,7 +725,7 @@ function resetSettings() {
 
   // Re-select default theme
   var defId = DEFAULT_THEMES[plannerType] || 'ocean';
-  var defTheme = THEMES.find(function(t) { return t.id === defId; }) || THEMES[0];
+  var defTheme = THEMES.find(function(th) { return th.id === defId; }) || THEMES[0];
   selectTheme(defTheme, true);
 
   showToast('✓ Reset to defaults');
