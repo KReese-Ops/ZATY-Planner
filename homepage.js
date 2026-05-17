@@ -13,17 +13,15 @@
     monthly: 'monthlyPlannerSettings'
   };
 
-  // ── "My Planner" — open saved planner directly ───────────────────────────
-  // Navigates to the appropriate planner page. The planner pages read their
-  // own settings from localStorage on init and apply them automatically.
+  // ── "My Planner" — set view preference before navigating ────────────────
+  // Navigation is handled by the <a href> on the link; this function just
+  // persists the correct view key so the planner opens on the right tab.
   function openMyPlanner(type) {
-    if (!DEST[type]) return;
-    // Remember the view so planner.html opens on the right tab.
     try {
-      if (type === 'weekly')      localStorage.setItem(LAST_VIEW_KEY, 'week');
-      else if (type === 'daily')  localStorage.setItem(LAST_VIEW_KEY, 'day');
+      if (type === 'weekly')     localStorage.setItem(LAST_VIEW_KEY, 'week');
+      else if (type === 'daily') localStorage.setItem(LAST_VIEW_KEY, 'day');
     } catch(e) {}
-    window.location.href = DEST[type];
+    // Do NOT call window.location.href here — the anchor's href handles it.
   }
   window.openMyPlanner = openMyPlanner;
 

@@ -85,8 +85,8 @@
 
       <!-- Daily -->
       <div class="template-card active">
-        <a class="my-planner-link" href="#" data-type="daily"
-           onclick="openMyPlanner('daily'); return false;">
+        <a class="my-planner-link" href="planner.html" data-type="daily"
+           onclick="openMyPlanner('daily')">
           <span class="my-planner-dot" aria-hidden="true"></span>
           my daily planner
         </a>
@@ -102,14 +102,14 @@
           </ul>
         </div>
         <a href="customize-template.html?type=daily" class="card-cta">
-          create my daily planner template →
+          create my template →
         </a>
       </div>
 
       <!-- Weekly -->
       <div class="template-card active">
-        <a class="my-planner-link" href="#" data-type="weekly"
-           onclick="openMyPlanner('weekly'); return false;">
+        <a class="my-planner-link" href="planner.html" data-type="weekly"
+           onclick="openMyPlanner('weekly')">
           <span class="my-planner-dot" aria-hidden="true"></span>
           my weekly planner
         </a>
@@ -124,15 +124,16 @@
             <li>Appointment category dots</li>
           </ul>
         </div>
-        <a href="customize-template.html?type=weekly" class="card-cta">
-          create my weekly planner template →
-        </a>
+        <div class="card-cta card-cta-soon" aria-disabled="true" role="button">
+          create my template
+          <span class="coming-soon-label">coming soon</span>
+        </div>
       </div>
 
       <!-- Monthly -->
       <div class="template-card active">
-        <a class="my-planner-link" href="#" data-type="monthly"
-           onclick="openMyPlanner('monthly'); return false;">
+        <a class="my-planner-link" href="monthly.html" data-type="monthly"
+           onclick="openMyPlanner('monthly')">
           <span class="my-planner-dot" aria-hidden="true"></span>
           my monthly planner
         </a>
@@ -147,9 +148,10 @@
             <li>Click any day to open planner</li>
           </ul>
         </div>
-        <a href="customize-template.html?type=monthly" class="card-cta">
-          create my monthly planner template →
-        </a>
+        <div class="card-cta card-cta-soon" aria-disabled="true" role="button">
+          create my template
+          <span class="coming-soon-label">coming soon</span>
+        </div>
       </div>
 
     </div>

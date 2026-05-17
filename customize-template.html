@@ -403,7 +403,7 @@
     <div class="settings-label">Planner Name <span class="optional-tag">optional</span></div>
     <input type="text" class="settings-input" id="display-name" maxlength="40"
       placeholder="e.g. Katy's Daily Planner" autocomplete="off" />
-    <div class="settings-hint">Replaces "Daily Edition" in the planner's top bar.</div>
+    <div class="settings-hint" id="name-hint">Replaces "Daily Edition" in the planner's top bar.</div>
   </div>
 
   <!-- ── Subtitle ── -->
@@ -411,7 +411,7 @@
     <div class="settings-label">Subtitle <span class="optional-tag">optional</span></div>
     <input type="text" class="settings-input" id="subtitle-input" maxlength="60"
       placeholder="e.g. Focus · Clarity · Action" autocomplete="off" />
-    <div class="settings-hint">A short tagline shown beneath the planner name.</div>
+    <div class="settings-hint">A short tagline displayed beneath the planner name in the top bar.</div>
   </div>
 
   <!-- ── Reflection prompts (daily only) ── -->
@@ -476,20 +476,32 @@ var SETTINGS_KEY_MAP = {
 };
 
 // ── STATE ────────────────────────────────────────────────────────────────
-var plannerType  = 'daily';
+var plannerType   = 'daily';
 var selectedTheme = THEMES[0];
 
 // ── INIT ─────────────────────────────────────────────────────────────────
 (function init() {
-  // Read type from URL query param
-  var params = new URLSearchParams(window.location.search);
-  var t = params.get('type');
-  if (t === 'weekly' || t === 'monthly' || t === 'daily') plannerType = t;
+  // Bug fix: renamed from 'var t' to 'var typeParam' to avoid shadowing the
+  // parameter name 't' used in THEMES.find() callbacks throughout this file.
+  var params    = new URLSearchParams(window.location.search);
+  var typeParam = params.get('type');
+  if (typeParam === 'weekly' || typeParam === 'monthly' || typeParam === 'daily') {
+    plannerType = typeParam;
+  }
+
+  // Bug fix: guard against an invalid/missing SETTINGS_KEY_MAP entry.
+  if (!SETTINGS_KEY_MAP[plannerType]) plannerType = 'daily';
 
   // Page title / badge
   var labels = { daily: 'Daily Planner', weekly: 'Weekly Planner', monthly: 'Monthly Planner' };
   document.title = 'Customize ' + labels[plannerType] + ' — ZATY Planner';
   document.getElementById('type-badge').textContent = labels[plannerType];
+
+  // Bug fix: display-name hint was hardcoded to "Daily Edition".
+  // Now it reflects the actual planner type being customized.
+  var editionNames = { daily: 'Daily Edition', weekly: 'Weekly Edition', monthly: 'Monthly' };
+  document.getElementById('name-hint').textContent =
+    'Replaces \u201c' + editionNames[plannerType] + '\u201d in the planner\u2019s top bar.';
 
   // Show/hide daily-only sections
   document.getElementById('prompts-section').style.display = (plannerType === 'daily') ? '' : 'none';
@@ -510,8 +522,8 @@ var selectedTheme = THEMES[0];
   if (raw) {
     try {
       var saved = JSON.parse(raw);
-      // Apply theme
-      var theme = THEMES.find(function(t) { return t.id === saved.themeId; }) || THEMES[0];
+      // Apply theme — rename callback param from 't' to 'th' for clarity.
+      var theme = THEMES.find(function(th) { return th.id === saved.themeId; }) || THEMES[0];
       selectTheme(theme, false);
       // Apply text fields
       if (saved.displayName) document.getElementById('display-name').value = saved.displayName;
@@ -524,8 +536,9 @@ var selectedTheme = THEMES[0];
     } catch(e) {}
   } else {
     // Select the type-appropriate default theme
-    var defId = DEFAULT_THEMES[plannerType] || 'ocean';
-    var defTheme = THEMES.find(function(t) { return t.id === defId; }) || THEMES[0];
+    var defId    = DEFAULT_THEMES[plannerType] || 'ocean';
+    // Bug fix: rename callback param from 't' to 'th' to avoid shadowing.
+    var defTheme = THEMES.find(function(th) { return th.id === defId; }) || THEMES[0];
     selectTheme(defTheme, false);
   }
 
@@ -576,11 +589,10 @@ function updatePreview() {
   document.getElementById('preview-brand-name').style.color = theme.accent;
   var tabs = document.querySelectorAll('.preview-tab');
   tabs.forEach(function(tab) { tab.style.background = theme.accentLight; tab.style.color = theme.accent; });
-  // First/active tab uses full accent
-  if (tabs[0]) { tabs[0].style.background = theme.accent; tabs[0].style.color = '#fff'; }
-  if (plannerType === 'monthly' && tabs[2]) {
-    tabs[2].style.background = theme.accent; tabs[2].style.color = '#fff';
-  }
+  // Bug fix: make the correct tab active based on the planner type.
+  // Previously always highlighted tabs[0] (Day), which is wrong for weekly.
+  var activeTabIdx = (plannerType === 'monthly') ? 2 : (plannerType === 'weekly') ? 1 : 0;
+  if (tabs[activeTabIdx]) { tabs[activeTabIdx].style.background = theme.accent; tabs[activeTabIdx].style.color = '#fff'; }
 
   // Card
   document.getElementById('preview-line-1').style.background = theme.accent;
