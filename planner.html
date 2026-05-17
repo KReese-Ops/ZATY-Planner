@@ -69,9 +69,11 @@
 
   /* ── PLANNING MOMENT ── */
   .pm-card { border-left: 3px solid var(--accent); margin-bottom: 1rem; }
-  .pm-header { margin-bottom: 0.9rem; }
+  .pm-header { margin-bottom: 0.9rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
   .pm-title { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 500; color: var(--accent); }
   .pm-sub { font-size: 11px; color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+  .clear-today-btn { background: none; border: none; font-size: 11px; color: var(--ink-faint); cursor: pointer; padding: 0; font-family: 'DM Sans', sans-serif; letter-spacing: 0.02em; flex-shrink: 0; margin-top: 2px; transition: color 0.15s; }
+  .clear-today-btn:hover { color: #8B2500; }
   .pm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pm-field label { font-size: 11px; color: var(--ink-light); display: block; margin-bottom: 4px; letter-spacing: 0.03em; }
   .pm-field textarea { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--ink); background: var(--sky); resize: none; line-height: 1.5; transition: border-color 0.15s, background 0.15s; }
@@ -223,8 +225,13 @@
   <div class="card pm-card" id="pm-section">
     <div class="card-body">
       <div class="pm-header">
-        <div class="pm-title">Daily Planning Moment</div>
-        <div class="pm-sub">Morning reflection</div>
+        <div>
+          <div class="pm-title">Daily Planning Moment</div>
+          <div class="pm-sub">Morning reflection</div>
+        </div>
+        <button type="button" class="clear-today-btn" id="clear-today-btn"
+          onclick="clearTodayReflection()"
+          title="Clear this date's reflection fields and notes (tasks &amp; appointments are kept)">Clear today</button>
       </div>
       <div class="pm-grid">
         <div class="pm-field">
@@ -384,6 +391,11 @@ function dateKey(d) {
 
 function todayKey() { return dateKey(today); }
 function currentKey() { return dateKey(current); }
+
+// Individual date-keyed storage keys for planning fields and notes.
+// Format: zaty_pm_<field>_YYYY-MM-DD  /  zaty_notes_YYYY-MM-DD
+function planningKey(field, d) { return 'zaty_pm_' + field + '_' + dateKey(d); }
+function notesKey(d)            { return 'zaty_notes_' + dateKey(d); }
 
 // ── STORAGE ──────────────────────────────────────────────
 function readStorage(key) {
@@ -547,29 +559,60 @@ function goToday() {
 
 // ── SAVE CURRENT DAY ────────────────────────────────────
 function saveCurrent() {
-  // Planning fields
+  // Flush planning fields to individual date-keyed entries
   ['focus','success','grateful','evening'].forEach(function(k) {
     var el = document.getElementById('pm-' + k);
-    if (el) currentDay.planning[k] = el.value;
+    if (el) writeStorage(planningKey(k, current), el.value);
   });
-  // Notes
+  // Flush notes to its own date-keyed entry
   var notesEl = document.getElementById('notes-area');
-  if (notesEl) currentDay.notes = notesEl.value;
+  if (notesEl) writeStorage(notesKey(current), notesEl.value);
+  // Save tasks + appointments (tasks/appts live in the day object)
   saveDay(current, currentDay);
 }
 
 function savePlanning() {
   ['focus','success','grateful','evening'].forEach(function(k) {
     var el = document.getElementById('pm-' + k);
-    if (el) currentDay.planning[k] = el.value;
+    if (el) writeStorage(planningKey(k, current), el.value);
   });
-  saveDay(current, currentDay);
 }
 
 function saveNotes() {
   var el = document.getElementById('notes-area');
-  if (el) currentDay.notes = el.value;
-  saveDay(current, currentDay);
+  if (el) writeStorage(notesKey(current), el.value);
+}
+
+// ── CLEAR TODAY ──────────────────────────────────────────
+function clearTodayReflection() {
+  var dk = dateKey(current);
+  var dateLabel = formatDate(current);
+  var msg = 'Clear reflection and notes for ' + dateLabel + '?\n\n'
+          + 'This will erase:\n'
+          + '  • Daily Planning Moment responses\n'
+          + '  • Notes & Record of Events\n\n'
+          + 'Tasks and appointments are NOT affected.';
+  if (!confirm(msg)) return;
+
+  ['focus','success','grateful','evening'].forEach(function(k) {
+    try { localStorage.removeItem('zaty_pm_' + k + '_' + dk); } catch(e) {}
+  });
+  try { localStorage.removeItem('zaty_notes_' + dk); } catch(e) {}
+
+  // Also clear legacy nested fields if they exist, to avoid stale fallback.
+  try {
+    var raw = localStorage.getItem('zaty_day_' + dk);
+    if (raw) {
+      var obj = JSON.parse(raw);
+      obj.planning = { focus:'', success:'', grateful:'', evening:'' };
+      obj.notes = '';
+      localStorage.setItem('zaty_day_' + dk, JSON.stringify(obj));
+    }
+  } catch(e) {}
+
+  reloadCurrentDay();
+  loadPlanning();
+  loadNotes();
 }
 
 // ── RENDER ALL ───────────────────────────────────────────
@@ -697,22 +740,29 @@ function deleteAppt(idx) {
 
 // ── PLANNING MOMENT ──────────────────────────────────────
 function loadPlanning() {
-  var p = currentDay.planning || {};
+  // Read from individual date-keyed entries; fall back to the legacy
+  // zaty_day_ nested object so existing data is migrated transparently.
+  var legacy = (currentDay && currentDay.planning) || {};
   ['focus','success','grateful','evening'].forEach(function(k) {
     var el = document.getElementById('pm-' + k);
-    if (el && document.activeElement !== el) el.value = p[k] || '';
+    if (!el || document.activeElement === el) return;
+    var val = readStorage(planningKey(k, current));
+    el.value = (val !== null) ? val : (legacy[k] || '');
   });
 }
 
 // ── NOTES ────────────────────────────────────────────────
 function loadNotes() {
   var el = document.getElementById('notes-area');
-  if (el && document.activeElement !== el) el.value = currentDay.notes || '';
+  if (!el || document.activeElement === el) return;
+  var val = readStorage(notesKey(current));
+  // Fall back to legacy zaty_day_ notes field for seamless migration.
+  el.value = (val !== null) ? val : ((currentDay && currentDay.notes) || '');
 }
 
 // ── GOOGLE CALENDAR (PLACEHOLDER) ───────────────────────
-function connectCalendar() {
-  var btn = document.getElementById('cal-btn');
+function applyCalConnectedUI() {
+  var btn    = document.getElementById('cal-btn');
   var notice = document.getElementById('cal-notice');
   if (notice) notice.style.display = 'block';
   if (btn) {
@@ -720,6 +770,11 @@ function connectCalendar() {
     btn.classList.add('connected');
     btn.setAttribute('aria-expanded', 'true');
   }
+}
+
+function connectCalendar() {
+  applyCalConnectedUI();
+  writeStorage('zaty_cal_connected', '1');
   if (calendarPlaceholderShown) return;
   calendarPlaceholderShown = true;
 
@@ -842,21 +897,35 @@ function escHtml(str) {
 (function init() {
   // If the monthly view sent the user here to a specific date, honour it.
   // sessionStorage key set by monthly.html day-cell click handler.
+  var jumpDate = null;
   try {
-    var jumpDate = sessionStorage.getItem('zaty_jump_date');
+    jumpDate = sessionStorage.getItem('zaty_jump_date');
     if (jumpDate) {
       sessionStorage.removeItem('zaty_jump_date');
       var parts = jumpDate.split('-').map(Number);
       if (parts.length === 3 && !isNaN(parts[0])) {
         current = new Date(parts[0], parts[1] - 1, parts[2]);
+      } else {
+        jumpDate = null; // malformed — treat as no jump
       }
     }
     // If monthly page requested week view
     if (sessionStorage.getItem('zaty_open_week')) {
       sessionStorage.removeItem('zaty_open_week');
       setView('week', null);
+    } else if (!jumpDate) {
+      // No sessionStorage override — restore the view chosen on the homepage.
+      // jumpDate means the user clicked a specific day, so open day view.
+      var lastView = readStorage('zaty_last_view');
+      if (lastView === 'week') setView('week', null);
     }
-  } catch (e) { /* sessionStorage blocked — open today */ }
+  } catch (e) { /* sessionStorage blocked — open today in day view */ }
+
+  // Restore calendar connected state without re-showing the alert.
+  if (readStorage('zaty_cal_connected') === '1') {
+    calendarPlaceholderShown = true;
+    applyCalConnectedUI();
+  }
 
   // Handle startup rollover (opening app fresh on a new day)
   var startupRolled = checkStartupRollover();

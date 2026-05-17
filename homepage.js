@@ -2,7 +2,8 @@
 (function () {
   'use strict';
 
-  var PREF_KEY = 'zaty_template';
+  var PREF_KEY      = 'zaty_template';
+  var LAST_VIEW_KEY = 'zaty_last_view';
   var DEST = { daily: 'planner.html', weekly: 'planner.html', monthly: 'monthly.html' };
 
   // ── Template selection ───────────────────────────────────────────────────
@@ -11,6 +12,13 @@
   function choose(template) {
     if (!DEST[template]) return;
     localStorage.setItem(PREF_KEY, template);
+    // Persist the view so planner.html can restore it on next open.
+    // 'monthly' goes to a different page, so no view key is needed for it.
+    if (template === 'weekly') {
+      localStorage.setItem(LAST_VIEW_KEY, 'week');
+    } else if (template === 'daily') {
+      localStorage.setItem(LAST_VIEW_KEY, 'day');
+    }
     window.location.href = DEST[template];
   }
 
@@ -52,7 +60,9 @@
 
     if (!overlay) {
       // Script ran before DOM was ready — wait for it.
-      document.addEventListener('DOMContentLoaded', function () {
+      // Use a named handler so only one listener is ever registered.
+      document.addEventListener('DOMContentLoaded', function onReady() {
+        document.removeEventListener('DOMContentLoaded', onReady);
         showRedirectOverlay(template);
       });
       return;
@@ -67,12 +77,16 @@
       window.location.href = dest;
     }, 1200);
 
-    document.getElementById('redirect-cancel').addEventListener('click', function () {
+    // Use onclick assignment (not addEventListener) so only one handler is
+    // ever active — prevents double-fire if this function is somehow called
+    // more than once (e.g. from a DOMContentLoaded retry above).
+    document.getElementById('redirect-cancel').onclick = function () {
       clearTimeout(timer);
       overlay.style.display = 'none';
       localStorage.removeItem(PREF_KEY);
+      localStorage.removeItem(LAST_VIEW_KEY);
       // chooseTemplate is already on window — the cards work immediately.
-    });
+    };
   }
 
 })();
