@@ -187,6 +187,44 @@
     .week-grid { grid-template-columns: 1fr; }
   }
 
+  /* ── USER INDICATOR (topbar) ── */
+  .user-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-light); }
+  .user-email { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .logout-btn { background: none; border: 1px solid var(--border-dark); border-radius: 5px; padding: 3px 9px; font-size: 11px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); cursor: pointer; transition: all 0.15s; }
+  .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .login-topbar-link { font-size: 11px; color: var(--accent); text-decoration: none; border: 1px solid var(--border-dark); border-radius: 5px; padding: 3px 9px; transition: all 0.15s; white-space: nowrap; }
+  .login-topbar-link:hover { background: var(--accent-light); }
+
+  /* ── CALENDAR AREA ── */
+  .cal-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .cal-connect-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--accent); color: white; border: none; border-radius: 6px; padding: 6px 13px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+  .cal-connect-btn:hover { background: var(--accent-hover); }
+  .cal-connected-label { font-size: 12px; color: var(--health); font-weight: 500; display: flex; align-items: center; gap: 5px; }
+  .cal-connected-label::before { content: '●'; font-size: 8px; }
+  .cal-disconnect-btn { background: none; border: 1px solid var(--border-dark); border-radius: 5px; padding: 4px 10px; font-size: 11px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); cursor: pointer; transition: all 0.15s; }
+  .cal-disconnect-btn:hover { border-color: var(--error-text, #8B2500); color: var(--error-text, #8B2500); }
+  .cal-sync-btn { background: none; border: 1px solid var(--border-dark); border-radius: 5px; padding: 4px 10px; font-size: 11px; font-family: 'DM Sans', sans-serif; color: var(--ink-light); cursor: pointer; transition: all 0.15s; }
+  .cal-sync-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .cal-notice { font-size: 11px; color: var(--ink-light); background: var(--accent-light); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; display: none; line-height: 1.6; }
+  .cal-events-section { margin-bottom: 8px; }
+  .cal-events-label { font-size: 10px; font-weight: 600; color: var(--ink-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .gcal-event-row { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .gcal-event-row:last-child { border-bottom: none; }
+  .gcal-event-time { font-size: 11px; color: var(--ink-light); min-width: 68px; white-space: nowrap; padding-top: 1px; }
+  .gcal-event-title { font-size: 13px; color: var(--ink); flex: 1; }
+  .gcal-event-title a { color: inherit; text-decoration: none; }
+  .gcal-event-title a:hover { color: var(--accent); text-decoration: underline; }
+  .gcal-event-loc { font-size: 11px; color: var(--ink-faint); margin-top: 1px; }
+  .cal-empty { font-size: 12px; color: var(--ink-faint); font-style: italic; padding: 4px 0 8px; }
+  .cal-error-msg { font-size: 12px; color: #8B2500; background: #FFF3F0; border: 1px solid #F5C4B8; border-radius: 6px; padding: 7px 10px; margin-bottom: 8px; }
+  .cal-loading { font-size: 12px; color: var(--ink-faint); padding: 4px 0 8px; }
+
+  /* ── NOTIFICATION BANNER ── */
+  .notif-banner { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 100; font-size: 13px; font-family: 'DM Sans', sans-serif; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); pointer-events: none; opacity: 0; transition: opacity 0.25s; white-space: nowrap; }
+  .notif-banner.success { background: #F0FAF4; color: #1A6B3A; border: 1px solid #A8DFC0; }
+  .notif-banner.error { background: #FFF3F0; color: #8B2500; border: 1px solid #F5C4B8; }
+  .notif-banner.visible { opacity: 1; }
+
   /* ── PRINT ── */
   @media print {
     .topbar, .add-row, .task-del, .appt-del, .cal-connect-btn, .view-tabs { display: none !important; }
@@ -198,6 +236,9 @@
 </style>
 </head>
 <body>
+
+<!-- ── NOTIFICATION BANNER ── -->
+<div class="notif-banner" id="notif-banner" role="status" aria-live="polite"></div>
 
 <!-- ── TOP BAR ── -->
 <div class="topbar">
@@ -217,6 +258,8 @@
       <span class="date-label" id="date-label"></span>
       <button type="button" class="nav-btn" aria-label="Next day" onclick="changeDay(1)">&#8250;</button>
     </div>
+    <!-- User session indicator (populated by JS) -->
+    <div id="user-indicator" style="display:none"></div>
   </div>
 </div>
 
@@ -301,11 +344,32 @@
             <span class="leg-item"><span class="cal-dot" style="background:var(--family)"></span>Family</span>
             <span class="leg-item"><span class="cal-dot" style="background:var(--personal)"></span>Personal</span>
           </div>
-          <button type="button" class="cal-connect-btn" id="cal-btn" aria-expanded="false" onclick="connectCalendar()">
-            &#128197; Connect Google Calendar
-          </button>
-          <div class="cal-notice" id="cal-notice">
-            <strong>Calendar Integration:</strong> When connected, your Google Calendar appointments will automatically sync here each day. You can always add appointments manually below without connecting a calendar.
+          <!-- Google Calendar connection UI — state managed by JS -->
+          <div id="cal-ui">
+            <!-- default: login prompt (shown when not signed in to backend) -->
+            <div id="cal-state-login" class="cal-bar" style="display:none">
+              <a href="/login.html" class="cal-connect-btn" style="text-decoration:none">&#128197; Sign in to connect Google Calendar</a>
+              <div class="cal-notice" style="display:block;margin-bottom:0">
+                <strong>Calendar Integration:</strong> Create a free account to securely link your Google Calendar. Appointments can always be added manually below.
+              </div>
+            </div>
+            <!-- disconnected: show connect button -->
+            <div id="cal-state-disconnected" class="cal-bar" style="display:none">
+              <button type="button" class="cal-connect-btn" onclick="connectCalendar()">&#128197; Connect Google Calendar</button>
+              <div class="cal-notice" style="display:block;margin-bottom:0">
+                <strong>Calendar Integration:</strong> Link your Google Calendar to automatically import today's events. You can always add appointments manually below.
+              </div>
+            </div>
+            <!-- connected: show status + disconnect -->
+            <div id="cal-state-connected" style="display:none">
+              <div class="cal-bar">
+                <span class="cal-connected-label" id="cal-connected-email"></span>
+                <button type="button" class="cal-sync-btn" onclick="syncCalendarEvents()">&#8635; Sync</button>
+                <button type="button" class="cal-disconnect-btn" onclick="disconnectCalendar()">Disconnect</button>
+              </div>
+              <div id="cal-error-area"></div>
+              <div id="cal-events-container"></div>
+            </div>
           </div>
           <div id="appt-list"></div>
           <div class="add-row">
@@ -376,7 +440,8 @@ var today = new Date();
 today.setHours(0,0,0,0);
 var current = new Date(today);
 var currentView = 'day';
-var calendarPlaceholderShown = false;
+// Current signed-in user (from /api/auth/me), null if not logged in
+var currentUser = null;
 
 // ── CUSTOM TEMPLATE SETTINGS ─────────────────────────────
 // Reads dailyPlannerSettings or weeklyPlannerSettings from localStorage
@@ -590,6 +655,7 @@ function changeDay(n) {
   reloadCurrentDay();
   renderDate();
   renderAll();
+  fetchCalendarEvents(dateKey(current));
 
   if (rolledCount > 0) showRolloverNotice(rolledCount, fromDate);
 
@@ -602,6 +668,7 @@ function goToday() {
   reloadCurrentDay();
   renderDate();
   renderAll();
+  fetchCalendarEvents(dateKey(current));
   if (currentView === 'week') renderWeek();
 }
 
@@ -808,28 +875,223 @@ function loadNotes() {
   el.value = (val !== null) ? val : ((currentDay && currentDay.notes) || '');
 }
 
-// ── GOOGLE CALENDAR (PLACEHOLDER) ───────────────────────
-function applyCalConnectedUI() {
-  var btn    = document.getElementById('cal-btn');
-  var notice = document.getElementById('cal-notice');
-  if (notice) notice.style.display = 'block';
-  if (btn) {
-    btn.textContent = '📅 Calendar Placeholder Active';
-    btn.classList.add('connected');
-    btn.setAttribute('aria-expanded', 'true');
-  }
+// ── GOOGLE CALENDAR ──────────────────────────────────────
+
+/**
+ * Show a temporary notification banner at the top of the page.
+ * type: 'success' | 'error'
+ */
+function showNotif(type, message, durationMs) {
+  var banner = document.getElementById('notif-banner');
+  if (!banner) return;
+  banner.className = 'notif-banner ' + type;
+  banner.textContent = message;
+  // force reflow so the transition fires
+  banner.offsetHeight; // eslint-disable-line no-unused-expressions
+  banner.classList.add('visible');
+  clearTimeout(banner._timer);
+  banner._timer = setTimeout(function () {
+    banner.classList.remove('visible');
+  }, durationMs || 4000);
 }
 
-function connectCalendar() {
-  applyCalConnectedUI();
-  writeStorage('zaty_cal_connected', '1');
-  if (calendarPlaceholderShown) return;
-  calendarPlaceholderShown = true;
+/**
+ * Apply the calendar UI state based on the current user object.
+ * Mirrors the three states: login-required, disconnected, connected.
+ */
+function applyCalState(user) {
+  var stateLogin  = document.getElementById('cal-state-login');
+  var stateDisc   = document.getElementById('cal-state-disconnected');
+  var stateConn   = document.getElementById('cal-state-connected');
+  if (!stateLogin) return;
 
-  // Placeholder for Google Calendar OAuth + API integration.
-  // In production: trigger google.accounts.oauth2 flow, then fetch events via
-  // https://www.googleapis.com/calendar/v3/calendars/primary/events
-  alert('Google Calendar Integration\n\nThis button will launch a Google sign-in flow and automatically sync your calendar events to this day\'s appointments.\n\nComing in a future update — you can add appointments manually in the meantime.');
+  if (!user) {
+    stateLogin.style.display = '';
+    stateDisc.style.display  = 'none';
+    stateConn.style.display  = 'none';
+    return;
+  }
+  if (!user.calendarConnected) {
+    stateLogin.style.display = 'none';
+    stateDisc.style.display  = '';
+    stateConn.style.display  = 'none';
+    return;
+  }
+  // Connected
+  stateLogin.style.display = 'none';
+  stateDisc.style.display  = 'none';
+  stateConn.style.display  = '';
+  var emailEl = document.getElementById('cal-connected-email');
+  if (emailEl) emailEl.textContent = 'Connected as ' + (user.calendarEmail || user.email);
+  // Load events for the currently displayed date
+  fetchCalendarEvents(dateKey(current));
+}
+
+/** Redirect to Google OAuth (user must already be logged in) */
+function connectCalendar() {
+  window.location.href = '/auth/google';
+}
+
+/** Disconnect Google Calendar for the current user */
+function disconnectCalendar() {
+  if (!confirm('Disconnect your Google Calendar? Your manually added appointments will be kept.')) return;
+  fetch('/api/calendar/disconnect', { method: 'POST' })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.ok) {
+        if (currentUser) currentUser.calendarConnected = false;
+        applyCalState(currentUser);
+        // Clear displayed events
+        var container = document.getElementById('cal-events-container');
+        if (container) container.innerHTML = '';
+        showNotif('success', 'Google Calendar disconnected.');
+      }
+    })
+    .catch(function () {
+      showNotif('error', 'Could not disconnect. Please try again.');
+    });
+}
+
+/** Trigger a manual refresh of calendar events for the current date */
+function syncCalendarEvents() {
+  fetchCalendarEvents(dateKey(current));
+}
+
+/**
+ * Fetch events from the backend for a given date string (YYYY-MM-DD)
+ * and render them in the calendar events container.
+ */
+function fetchCalendarEvents(dateStr) {
+  var container = document.getElementById('cal-events-container');
+  var errorArea = document.getElementById('cal-error-area');
+  if (!container) return;
+  if (errorArea) errorArea.innerHTML = '';
+
+  // Only proceed if calendar is connected
+  if (!currentUser || !currentUser.calendarConnected) return;
+
+  container.innerHTML = '<div class="cal-loading">&#8203;Loading calendar events…</div>';
+
+  fetch('/api/calendar/events?date=' + encodeURIComponent(dateStr))
+    .then(function (r) { return r.json().then(function (d) { return { status: r.status, data: d }; }); })
+    .then(function (res) {
+      if (res.status === 401 && res.data.error === 'reconnect_required') {
+        container.innerHTML = '';
+        if (errorArea) {
+          errorArea.innerHTML =
+            '<div class="cal-error-msg">Your Google Calendar access has expired. ' +
+            '<a href="/auth/google" style="color:inherit;font-weight:500">Reconnect</a> to continue syncing.</div>';
+        }
+        return;
+      }
+      if (res.status !== 200) {
+        container.innerHTML =
+          '<div class="cal-error-msg">' +
+          (res.data.message || res.data.error || 'Could not fetch calendar events.') +
+          '</div>';
+        return;
+      }
+      renderCalendarEvents(res.data.events || []);
+    })
+    .catch(function () {
+      container.innerHTML = '<div class="cal-error-msg">Could not reach the server to load events.</div>';
+    });
+}
+
+/**
+ * Render an array of Google Calendar event objects inside the events container.
+ */
+function renderCalendarEvents(events) {
+  var container = document.getElementById('cal-events-container');
+  if (!container) return;
+  if (!events.length) {
+    container.innerHTML =
+      '<div class="cal-events-section">' +
+      '<div class="cal-events-label">Google Calendar Events</div>' +
+      '<div class="cal-empty">No events from Google Calendar for this day.</div>' +
+      '</div>';
+    return;
+  }
+
+  var rows = events.map(function (ev) {
+    var timeStr;
+    if (ev.allDay) {
+      timeStr = 'All day';
+    } else {
+      var start = new Date(ev.start.dateTime);
+      timeStr = start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    }
+
+    var locHtml = ev.location
+      ? '<div class="gcal-event-loc">&#128205; ' + escHtml(ev.location) + '</div>'
+      : '';
+
+    var titleHtml = ev.htmlLink
+      ? '<a href="' + escHtml(ev.htmlLink) + '" target="_blank" rel="noopener">' + escHtml(ev.summary) + '</a>'
+      : escHtml(ev.summary);
+
+    return (
+      '<div class="gcal-event-row">' +
+      '<div class="gcal-event-time">' + escHtml(timeStr) + '</div>' +
+      '<div class="gcal-event-title">' + titleHtml + locHtml + '</div>' +
+      '</div>'
+    );
+  }).join('');
+
+  container.innerHTML =
+    '<div class="cal-events-section">' +
+    '<div class="cal-events-label">Google Calendar Events (' + events.length + ')</div>' +
+    rows +
+    '</div>';
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * Fetch the current session from the backend and update the topbar +
+ * calendar UI accordingly. Safe to call even if the server is unreachable.
+ */
+function checkSession() {
+  fetch('/api/auth/me')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      currentUser = data.user || null;
+      renderUserIndicator(currentUser);
+      applyCalState(currentUser);
+    })
+    .catch(function () {
+      // Server not running — keep planner usable as a static app
+      currentUser = null;
+      applyCalState(null);
+    });
+}
+
+/** Render the logged-in user's email + logout button in the topbar */
+function renderUserIndicator(user) {
+  var el = document.getElementById('user-indicator');
+  if (!el) return;
+  if (!user) {
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  el.style.display = '';
+  el.className = 'user-indicator';
+  el.innerHTML =
+    '<span class="user-email" title="' + escHtml(user.email) + '">' + escHtml(user.displayName || user.email) + '</span>' +
+    '<button type="button" class="logout-btn" onclick="logOut()">Sign out</button>';
+}
+
+function logOut() {
+  fetch('/api/auth/logout', { method: 'POST' })
+    .then(function () { window.location.reload(); })
+    .catch(function () { window.location.reload(); });
 }
 
 // ── WEEK VIEW ────────────────────────────────────────────
@@ -972,11 +1234,27 @@ function escHtml(str) {
     }
   } catch (e) { /* sessionStorage blocked — open today in day view */ }
 
-  // Restore calendar connected state without re-showing the alert.
-  if (readStorage('zaty_cal_connected') === '1') {
-    calendarPlaceholderShown = true;
-    applyCalConnectedUI();
-  }
+  // Check backend session and apply calendar UI state.
+  checkSession();
+
+  // Handle return from Google OAuth
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('cal_connected') === '1') {
+      showNotif('success', '&#10003; Google Calendar connected successfully!', 5000);
+      // Remove the param from the URL without reloading
+      history.replaceState(null, '', window.location.pathname);
+    } else if (params.get('cal_error')) {
+      var errMap = {
+        invalid_state: 'OAuth security check failed. Please try connecting again.',
+        token_exchange_failed: 'Could not exchange the authorization code. Please try again.',
+        access_denied: 'Google Calendar access was denied.',
+      };
+      var msg = errMap[params.get('cal_error')] || 'Google Calendar connection failed: ' + params.get('cal_error');
+      showNotif('error', msg, 6000);
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }());
 
   // Apply custom template settings.  Daily settings are the base; weekly
   // settings are layered on top when the view is (or becomes) week view.
