@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customize Monthly Planner — ZATY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@300;400;500;600&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream:        #FAF8F3;
+      --warm-white:   #FFFDF7;
+      --ink:          #1C1A17;
+      --ink-light:    #6B6760;
+      --ink-faint:    #B0ADA8;
+      --border:       #E8E4DC;
+      --border-dark:  #C8C3BA;
+      --accent:       #5C4A2A;
+      --accent-hover: #47381F;
+      --accent-light: #F0EAE0;
+      --accent-mid:   #D4C4A8;
+      --gold:         #8A6D3B;
+      --radius:       12px;
+      --radius-lg:    18px;
+      --shadow-sm:    0 1px 3px rgba(28,26,23,0.08);
+      --shadow-md:    0 4px 20px rgba(28,26,23,0.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-top: 58px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--warm-white);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: fixed; top: 0; left: 0; width: 100%;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .brand {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 19px; font-weight: 600; color: var(--accent);
+      letter-spacing: 0.01em; text-decoration: none;
+    }
+    .brand span {
+      font-size: 11px; font-weight: 300;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink-light); margin-left: 8px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .home-link {
+      font-size: 13px; color: var(--ink-light); text-decoration: none;
+      letter-spacing: 0.01em; transition: color 0.15s;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .home-link:hover { color: var(--accent); }
+
+    /* ── PAGE LAYOUT ── */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    .page-header { text-align: center; margin-bottom: 2.5rem; }
+    .page-eyebrow {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.5rem;
+    }
+    .page-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(1.7rem, 3vw, 2.3rem);
+      font-weight: 600; color: var(--ink); margin-bottom: 0.45rem;
+    }
+    .page-sub { font-size: 0.9rem; color: var(--ink-light); max-width: 480px; margin: 0 auto; }
+
+    /* ── TWO-COLUMN GRID ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 355px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    .preview-col { position: sticky; top: 76px; }
+
+    /* ── SECTION CARD ── */
+    .section-card {
+      background: var(--warm-white);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.6rem 1.6rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .section-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent-mid);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .section-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.25rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.1rem; font-weight: 600; color: var(--ink); margin-bottom: 0.3rem;
+    }
+    .section-desc { font-size: 0.82rem; color: var(--ink-light); margin-bottom: 1.1rem; line-height: 1.5; }
+
+    /* ── COLOR SWATCHES ── */
+    .color-grid { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+    .color-swatch-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+    .color-swatch {
+      width: 46px; height: 46px; border-radius: 50%;
+      border: 2px solid var(--border-dark);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      position: relative; flex-shrink: 0;
+    }
+    .color-swatch:hover { transform: scale(1.1); box-shadow: var(--shadow-md); }
+    .color-swatch.selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light), var(--shadow-sm); }
+    .color-swatch.selected::after {
+      content: '';
+      position: absolute; bottom: -3px; right: -3px;
+      width: 16px; height: 16px;
+      background: var(--accent)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='2,6 5,9 10,3' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        center / 10px no-repeat;
+      border-radius: 50%; border: 2px solid white;
+    }
+    .swatch-label { font-size: 10px; color: var(--ink-faint); text-align: center; white-space: nowrap; }
+
+    .color-picker-outer { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
+    .color-picker-face {
+      width: 46px; height: 46px; border-radius: 50%;
+      border: 2px dashed var(--border-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--ink-faint);
+      cursor: pointer; background: white; position: relative;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .color-picker-face:hover { border-color: var(--accent-mid); transform: scale(1.08); }
+    .color-picker-face.selected {
+      border-style: solid; border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    .color-picker-face.selected::after {
+      content: '';
+      position: absolute; bottom: -3px; right: -3px;
+      width: 16px; height: 16px;
+      background: var(--accent)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='2,6 5,9 10,3' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        center / 10px no-repeat;
+      border-radius: 50%; border: 2px solid white;
+    }
+    #custom-color-input {
+      position: absolute; inset: 0; opacity: 0;
+      cursor: pointer; border-radius: 50%; width: 100%; height: 100%;
+    }
+
+    /* ── BANNER GRID ── */
+    .banner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+    .banner-option {
+      cursor: pointer; border: 2px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s; position: relative;
+    }
+    .banner-option:hover { border-color: var(--accent-mid); }
+    .banner-option.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+    .banner-option.selected::after {
+      content: '';
+      position: absolute; top: 6px; right: 6px; width: 18px; height: 18px;
+      background: var(--accent)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='2,6 5,9 10,3' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        center / 10px no-repeat;
+      border-radius: 50%; border: 2px solid rgba(255,255,255,0.75);
+    }
+    .banner-thumb { height: 54px; width: 100%; display: flex; align-items: center; justify-content: center; }
+    .banner-none .banner-thumb { background: var(--cream); }
+    .banner-none-icon { font-size: 22px; color: var(--ink-faint); }
+    .banner-name {
+      font-size: 11px; color: var(--ink-light);
+      padding: 5px 8px 6px; background: var(--warm-white);
+      text-align: center; border-top: 1px solid var(--border);
+    }
+
+    /* ── PROMPT RADIOS ── */
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-option {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 14px; border: 1.5px solid var(--border);
+      border-radius: var(--radius); cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .radio-option:hover { border-color: var(--accent-mid); background: var(--cream); }
+    .radio-option.selected { border-color: var(--accent); background: var(--accent-light); }
+    .radio-option input[type="radio"] { margin-top: 3px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+    .radio-label { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 1px; }
+    .radio-desc { font-size: 11px; color: var(--ink-light); line-height: 1.4; }
+    .custom-prompt-wrap { margin-top: 10px; display: none; }
+    .custom-prompt-wrap.visible { display: block; }
+    .custom-prompt-input {
+      width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius);
+      padding: 9px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+      color: var(--ink); background: var(--cream); resize: vertical; min-height: 68px; line-height: 1.5;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .custom-prompt-input:focus { outline: none; border-color: var(--accent); background: var(--warm-white); }
+    .custom-prompt-input::placeholder { color: var(--ink-faint); }
+
+    /* ── OPTION ROWS ── */
+    .option-rows { display: flex; flex-direction: column; }
+    .option-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--border);
+    }
+    .option-row:last-child { border-bottom: none; }
+    .option-row-label { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .option-row-desc { font-size: 11px; color: var(--ink-light); margin-top: 1px; line-height: 1.3; }
+    .option-row-right { flex-shrink: 0; }
+
+    /* Content row — wraps so the type selector sits on its own line */
+    .option-row-content {
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      padding: 13px 0 8px;
+    }
+    .option-row-content .option-row-left { flex: 1; min-width: 180px; }
+
+    .content-type-row {
+      width: 100%;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0 5px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .content-type-row.visible { display: flex; }
+    .content-type-lbl { font-size: 11px; color: var(--ink-light); white-space: nowrap; }
+
+    /* ── TOGGLE ── */
+    .toggle { position: relative; width: 44px; height: 24px; display: block; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      display: block; width: 44px; height: 24px;
+      background: var(--border-dark); border-radius: 12px;
+      cursor: pointer; transition: background 0.2s; position: relative;
+    }
+    .toggle-track::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; background: white; border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: var(--accent); }
+    .toggle input:checked + .toggle-track::after { transform: translateX(20px); }
+
+    /* ── SEGMENTED CONTROL ── */
+    .seg-control {
+      display: flex; gap: 3px; background: var(--cream);
+      border: 1.5px solid var(--border); border-radius: 8px; padding: 3px;
+    }
+    .seg-btn {
+      background: none; border: none; border-radius: 5px;
+      padding: 4px 11px; font-size: 12px; font-family: 'DM Sans', sans-serif;
+      color: var(--ink-light); cursor: pointer; font-weight: 400;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .seg-btn.active { background: var(--warm-white); color: var(--ink); font-weight: 500; box-shadow: var(--shadow-sm); }
+
+    /* ── PREVIEW PANEL ── */
+    .preview-card {
+      background: var(--warm-white); border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-md); position: relative;
+    }
+    .preview-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent-mid);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0; z-index: 1;
+    }
+    .preview-header-bar { padding: 0.85rem 1.1rem 0.7rem; border-bottom: 1px solid var(--border); }
+    .preview-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+    .preview-title-text { font-family: 'Playfair Display', Georgia, serif; font-size: 0.88rem; color: var(--ink); }
+
+    /* mini planner */
+    .mini-planner { min-height: 440px; transition: background 0.3s; }
+    .mini-banner { height: 52px; width: 100%; display: none; transition: background 0.3s; }
+    .mini-banner.visible { display: block; }
+    .mini-body { padding: 10px 11px; display: flex; flex-direction: column; gap: 8px; }
+
+    /* mini content block */
+    .mini-content-block {
+      background: white;
+      border: 1px solid var(--border); border-left: 3px solid var(--accent);
+      border-radius: 7px; padding: 9px 10px; display: none;
+      transition: border-left-color 0.25s;
+    }
+    .mini-content-block.visible { display: block; }
+    .mini-content-type-lbl { font-size: 8px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+    .mini-content-text { font-size: 9px; color: var(--ink); font-style: italic; line-height: 1.55; margin-bottom: 3px; }
+    .mini-content-attr { font-size: 8px; color: var(--ink-light); }
+
+    /* mini monthly calendar */
+    .mini-month-card { background: white; border: 1px solid var(--border); border-radius: 7px; padding: 9px 10px; }
+    .mini-month-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .mini-month-name { font-size: 9px; font-weight: 600; color: var(--ink); letter-spacing: 0.04em; }
+    .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .mini-cal-head {
+      font-size: 6px; text-align: center; color: var(--ink-faint);
+      font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      padding-bottom: 3px;
+    }
+    .mini-cal-cell {
+      background: var(--cream); border: 1px solid var(--border); border-radius: 3px;
+      padding: 2px; min-height: 26px;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .mini-cal-cell.other-month { opacity: 0.28; }
+    .mini-cal-cell.today { border-color: #4A6FA5; border-width: 1.5px; }
+    .mini-cal-num {
+      font-size: 7px; font-weight: 600; color: var(--ink);
+      width: 13px; height: 13px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .mini-cal-cell.today .mini-cal-num { background: #4A6FA5; color: white; }
+    .mini-cal-dots { display: flex; gap: 1px; flex-wrap: wrap; justify-content: center; }
+    .mini-cal-dot { width: 4px; height: 4px; border-radius: 50%; }
+
+    /* mini goals */
+    .mini-goals { background: white; border: 1px solid var(--border); border-radius: 7px; padding: 9px 10px; transition: opacity 0.2s; }
+    .mini-goals.hidden-section { opacity: 0.2; }
+    .mini-card-lbl { font-size: 7px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 5px; }
+    .mini-goal-item {
+      display: flex; align-items: center; gap: 5px; padding: 3px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .mini-goal-item:last-child { border-bottom: none; }
+    .mini-goal-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .mini-goal-text { font-size: 8px; color: var(--ink); flex: 1; }
+    .mini-on-track-badge {
+      font-size: 7px; padding: 1px 5px; border-radius: 3px;
+      background: #EAF5EC; color: #2D7A3E; font-weight: 600;
+      letter-spacing: 0.04em; white-space: nowrap; flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .mini-on-track-badge.hidden-badge { display: none; }
+
+    /* mini habit tracker */
+    .mini-habits { background: white; border: 1px solid var(--border); border-radius: 7px; padding: 9px 10px; transition: opacity 0.2s; }
+    .mini-habits.hidden-section { opacity: 0.2; }
+    .mini-habit-row { display: flex; align-items: center; gap: 5px; padding: 3px 0; }
+    .mini-habit-name { font-size: 8px; color: var(--ink); width: 40px; flex-shrink: 0; }
+    .mini-habit-pips { display: flex; gap: 2px; flex-wrap: wrap; }
+    .mini-habit-pip { width: 5px; height: 5px; border-radius: 50%; background: var(--border); }
+    .mini-habit-pip.done { background: var(--accent-mid); }
+
+    /* ── ACTION BUTTONS ── */
+    .actions-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 0.25rem; }
+    .btn-primary {
+      flex: 1; min-width: 150px;
+      background: var(--accent); color: #FFF8F0;
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600;
+      letter-spacing: 0.04em; padding: 0.75rem 1.5rem; border-radius: 8px; border: none;
+      cursor: pointer; transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(92,74,42,0.22); text-align: center;
+    }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(92,74,42,0.28); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-secondary {
+      background: var(--warm-white); color: var(--ink-light);
+      font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500;
+      padding: 0.75rem 1.25rem; border-radius: 8px; border: 1.5px solid var(--border-dark);
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-secondary:hover { background: var(--cream); border-color: var(--accent-mid); color: var(--accent); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--ink); color: #FFF8F0;
+      font-size: 13px; font-weight: 500; padding: 10px 22px;
+      border-radius: 8px; box-shadow: var(--shadow-md); opacity: 0;
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s;
+      z-index: 500; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { background: #2D6B50; }
+    .toast.warning { background: #7A4A20; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .preview-col { position: static; order: -1; }
+      .preview-card { max-width: 480px; margin: 0 auto; }
+    }
+    @media (max-width: 560px) {
+      .banner-grid { grid-template-columns: repeat(2, 1fr); }
+      .topbar { padding: 0 1.25rem; }
+      .page-wrap { padding: 1.5rem 1rem 4rem; }
+      .actions-bar { flex-direction: column; }
+      .btn-primary, .btn-secondary { width: 100%; text-align: center; }
+      .brand span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="toast" id="toast" aria-live="polite"></div>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <a href="homepage.html" class="brand">ZATY Planner <span>Monthly Edition</span></a>
+  <a href="homepage.html" class="home-link">Back to homepage &nbsp;→</a>
+</header>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div class="page-eyebrow">Personalization</div>
+    <h1 class="page-title">Customize Your Monthly Planner</h1>
+    <p class="page-sub">Choose colors, banners, content blocks, and layout options. The preview updates as you make changes.</p>
+  </div>
+
+  <div class="content-grid">
+
+    <!-- ══════════════════════════════
+         SETTINGS COLUMN
+    ══════════════════════════════ -->
+    <div class="settings-col">
+
+      <!-- 1 · BACKGROUND COLOR -->
+      <div class="section-card">
+        <div class="section-label">Appearance</div>
+        <h2 class="section-title">🎨 Background Color</h2>
+        <p class="section-desc">Sets the canvas color behind every card in your monthly planner.</p>
+        <div class="color-grid" id="color-grid"></div>
+      </div>
+
+      <!-- 2 · TOP BANNER -->
+      <div class="section-card">
+        <div class="section-label">Appearance</div>
+        <h2 class="section-title">🖼 Top Banner</h2>
+        <p class="section-desc">A decorative strip at the top of your monthly view. Gradients are shown here — swap for an image URL in the integration code.</p>
+        <div class="banner-grid" id="banner-grid"></div>
+      </div>
+
+      <!-- 3 · MONTHLY REFLECTION PROMPT -->
+      <div class="section-card">
+        <div class="section-label">Content</div>
+        <h2 class="section-title">💬 Monthly Reflection Prompt</h2>
+        <p class="section-desc">The opening question shown at the start of your monthly planning session.</p>
+        <div class="radio-group">
+          <label class="radio-option selected" id="radio-opt-default">
+            <input type="radio" name="promptType" value="default" checked />
+            <div>
+              <div class="radio-label">Use the default prompt</div>
+              <div class="radio-desc">"What progress am I most proud of this month?"</div>
+            </div>
+          </label>
+          <label class="radio-option" id="radio-opt-custom">
+            <input type="radio" name="promptType" value="custom" />
+            <div>
+              <div class="radio-label">Write my own prompt</div>
+              <div class="radio-desc">Set a personal reflection question for the start of each month.</div>
+            </div>
+          </label>
+        </div>
+        <div class="custom-prompt-wrap" id="custom-prompt-wrap">
+          <textarea class="custom-prompt-input" id="custom-prompt-input"
+            placeholder="e.g. What's one thing I want to remember from this month?&#10;e.g. What habit moved the needle most this month?"></textarea>
+        </div>
+      </div>
+
+      <!-- 4 · EXTRA OPTIONS -->
+      <div class="section-card">
+        <div class="section-label">Layout &amp; Style</div>
+        <h2 class="section-title">✦ Extra Options</h2>
+        <p class="section-desc">Fine-tune fonts, priority colors, and which sections appear in your monthly view.</p>
+
+        <div class="option-rows">
+
+          <!-- Font Style -->
+          <div class="option-row">
+            <div>
+              <div class="option-row-label">Body Font</div>
+              <div class="option-row-desc">Applies to all text in the monthly planner.</div>
+            </div>
+            <div class="option-row-right">
+              <div class="seg-control" id="font-control">
+                <button type="button" class="seg-btn active" data-val="default">System</button>
+                <button type="button" class="seg-btn" data-val="serif">Serif</button>
+                <button type="button" class="seg-btn" data-val="rounded">Rounded</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Priority Colors -->
+          <div class="option-row">
+            <div>
+              <div class="option-row-label">Priority Badge Colors</div>
+              <div class="option-row-desc">A, B, and C dot color style for calendar day cells.</div>
+            </div>
+            <div class="option-row-right">
+              <div class="seg-control" id="priority-control">
+                <button type="button" class="seg-btn active" data-val="default">Classic</button>
+                <button type="button" class="seg-btn" data-val="warm">Warm</button>
+                <button type="button" class="seg-btn" data-val="mono">Mono</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Show Monthly Goals -->
+          <div class="option-row">
+            <div>
+              <div class="option-row-label">Show Monthly Goals</div>
+              <div class="option-row-desc">A/B/C priority goal list shown below the calendar.</div>
+            </div>
+            <div class="option-row-right">
+              <label class="toggle">
+                <input type="checkbox" id="toggle-goals" checked />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Show On Track Badge -->
+          <div class="option-row">
+            <div>
+              <div class="option-row-label">Show "On Track" Badge</div>
+              <div class="option-row-desc">Status badge displayed next to each goal.</div>
+            </div>
+            <div class="option-row-right">
+              <label class="toggle">
+                <input type="checkbox" id="toggle-on-track" checked />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Monthly Content Block + type selector -->
+          <div class="option-row option-row-content">
+            <div class="option-row-left">
+              <div class="option-row-label">Monthly Content Block</div>
+              <div class="option-row-desc">Inspirational block shown above the calendar grid.</div>
+            </div>
+            <div class="option-row-right">
+              <label class="toggle">
+                <input type="checkbox" id="toggle-content" checked />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+            <div class="content-type-row visible" id="content-type-row">
+              <span class="content-type-lbl">Show as:</span>
+              <div class="seg-control" id="content-type-control">
+                <button type="button" class="seg-btn active" data-val="quote">Quote</button>
+                <button type="button" class="seg-btn" data-val="joke">Joke</button>
+                <button type="button" class="seg-btn" data-val="verse">Bible Verse</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Show Habit Tracker -->
+          <div class="option-row">
+            <div>
+              <div class="option-row-label">Show Habit Tracker</div>
+              <div class="option-row-desc">Monthly habit tracking grid shown below goals.</div>
+            </div>
+            <div class="option-row-right">
+              <label class="toggle">
+                <input type="checkbox" id="toggle-habits" checked />
+                <span class="toggle-track"></span>
+              </label>
+            </div>
+          </div>
+
+        </div><!-- /option-rows -->
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="actions-bar">
+        <button type="button" class="btn-secondary" onclick="resetDefaults()">↩&nbsp; Reset to Defaults</button>
+        <button type="button" class="btn-primary"   onclick="saveSettings()">Save Settings &nbsp;→</button>
+      </div>
+
+    </div><!-- /settings-col -->
+
+
+    <!-- ══════════════════════════════
+         PREVIEW COLUMN
+    ══════════════════════════════ -->
+    <div class="preview-col">
+      <div class="preview-card">
+        <div class="preview-header-bar">
+          <div class="preview-eyebrow">Live Preview</div>
+          <div class="preview-title-text">Monthly Planner — as it will appear</div>
+        </div>
+
+        <div class="mini-planner" id="mini-planner">
+          <div class="mini-banner" id="mini-banner"></div>
+
+          <div class="mini-body">
+
+            <!-- Content block -->
+            <div class="mini-content-block" id="mini-content-block">
+              <div class="mini-content-type-lbl" id="mini-content-type-lbl"></div>
+              <div class="mini-content-text"      id="mini-content-text"></div>
+              <div class="mini-content-attr"      id="mini-content-attr"></div>
+            </div>
+
+            <!-- Monthly calendar grid -->
+            <div class="mini-month-card">
+              <div class="mini-month-header">
+                <span class="mini-month-name" id="mini-month-name"></span>
+              </div>
+              <div class="mini-cal-grid" id="mini-cal-grid"></div>
+            </div>
+
+            <!-- Goals -->
+            <div class="mini-goals" id="mini-goals">
+              <div class="mini-card-lbl">Monthly Goals – Prioritized Tasks</div>
+              <div class="mini-goal-item">
+                <div class="mini-goal-dot" id="gdot-a" style="background:#C94040;"></div>
+                <div class="mini-goal-text">Complete project launch</div>
+                <div class="mini-on-track-badge" id="badge-1">On Track</div>
+              </div>
+              <div class="mini-goal-item">
+                <div class="mini-goal-dot" id="gdot-b" style="background:#D67D3E;"></div>
+                <div class="mini-goal-text">Read two new books</div>
+                <div class="mini-on-track-badge" id="badge-2">On Track</div>
+              </div>
+              <div class="mini-goal-item">
+                <div class="mini-goal-dot" id="gdot-c" style="background:#7BAF5A;"></div>
+                <div class="mini-goal-text">Daily morning walk</div>
+                <div class="mini-on-track-badge" id="badge-3">On Track</div>
+              </div>
+            </div>
+
+            <!-- Habit Tracker -->
+            <div class="mini-habits" id="mini-habits">
+              <div class="mini-card-lbl">Habit Tracker</div>
+              <div class="mini-habit-row">
+                <span class="mini-habit-name">Exercise</span>
+                <div class="mini-habit-pips" id="habit-pips-1"></div>
+              </div>
+              <div class="mini-habit-row">
+                <span class="mini-habit-name">Reading</span>
+                <div class="mini-habit-pips" id="habit-pips-2"></div>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- /mini-planner -->
+      </div>
+    </div><!-- /preview-col -->
+
+  </div><!-- /content-grid -->
+</div><!-- /page-wrap -->
+
+
+<script>
+var STORAGE_KEY = 'monthlyPlannerSettings';
+
+var DEFAULTS = {
+  bgColor:        '#FAF8F3',
+  banner:         'none',
+  promptType:     'default',
+  customPrompt:   '',
+  fontStyle:      'default',
+  priorityScheme: 'default',
+  showGoals:      true,
+  showOnTrack:    true,
+  showContent:    true,
+  contentType:    'quote',
+  showHabits:     true
+};
+
+var BG_COLORS = [
+  { value: '#FAF8F3', label: 'Warm Cream'   },
+  { value: '#FFF2E6', label: 'Light Orange'  },
+  { value: '#EFF5FF', label: 'Sky Blue'      },
+  { value: '#EFF7EE', label: 'Soft Green'    },
+  { value: '#F2F2F0', label: 'Neutral Gray'  }
+];
+
+var BANNERS = [
+  { value: 'none',         label: 'None',         thumb: null },
+  { value: 'golden-hour',  label: 'Golden Hour',  thumb: 'linear-gradient(135deg,#C8845A 0%,#E8B97A 45%,#F5E0C0 100%)' },
+  { value: 'still-waters', label: 'Still Waters', thumb: 'linear-gradient(135deg,#3A6A8A 0%,#6A9FBF 50%,#C2DCF0 100%)' },
+  { value: 'morning-mist', label: 'Morning Mist', thumb: 'linear-gradient(135deg,#3A6A50 0%,#6AAF8A 50%,#C2E8D2 100%)' },
+  { value: 'midnight-ink', label: 'Midnight Ink', thumb: 'linear-gradient(135deg,#1A1510 0%,#3A2A1E 55%,#6A5A48 100%)' }
+];
+
+var CONTENT_SAMPLES = {
+  quote: {
+    typeLabel: 'Quote of the Month',
+    borderColor: '#5C4A2A',
+    text: '"In the middle of every difficulty lies opportunity."',
+    attr: '— Albert Einstein'
+  },
+  joke: {
+    typeLabel: 'Joke of the Month',
+    borderColor: '#4A6FA5',
+    text: '"Why did the calendar go to therapy?"',
+    attr: 'It had too many dates.'
+  },
+  verse: {
+    typeLabel: 'Verse of the Month',
+    borderColor: '#2D7A5E',
+    text: '"I can do all things through Christ who strengthens me."',
+    attr: '— Philippians 4:13'
+  }
+};
+
+var FONT_STACKS = {
+  default: "'DM Sans',-apple-system,sans-serif",
+  serif:   "'Playfair Display',Georgia,serif",
+  rounded: "'Nunito','DM Sans',sans-serif"
+};
+
+var PRIORITY_COLORS = {
+  default: { a: '#C94040', b: '#D67D3E', c: '#7BAF5A' },
+  warm:    { a: '#E8735A', b: '#D4A853', c: '#8FB86E' },
+  mono:    { a: '#4A4A4A', b: '#7A7A7A', c: '#ADADAD' }
+};
+
+var settings = Object.assign({}, DEFAULTS);
+
+// ── INIT ─────────────────────────────────────────────────────────────
+(function init() {
+  loadFromStorage();
+  buildColorGrid();
+  buildBannerGrid();
+  buildCalendar();
+  buildHabitPips();
+  bindPromptRadios();
+  bindSegControls();
+  bindToggles();
+  applySettingsToForm();
+  updatePreview();
+})();
+
+// ── STORAGE ──────────────────────────────────────────────────────────
+function loadFromStorage() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) settings = Object.assign({}, DEFAULTS, JSON.parse(raw));
+  } catch(e) { settings = Object.assign({}, DEFAULTS); }
+}
+
+function saveSettings() {
+  collectFromForm();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    showToast('Settings saved!', 'success');
+  } catch(e) {
+    showToast('Could not save — storage may be full.', 'warning');
+  }
+}
+
+function resetDefaults() {
+  if (!confirm('Reset all monthly planner customizations to defaults? Your saved settings will be cleared.')) return;
+  settings = Object.assign({}, DEFAULTS);
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  applySettingsToForm();
+  updatePreview();
+  showToast('Reset to defaults.', '');
+}
+
+// ── COLOR SWATCHES ───────────────────────────────────────────────────
+function buildColorGrid() {
+  var grid = document.getElementById('color-grid');
+  var isCustom = !BG_COLORS.some(function(c) { return c.value === settings.bgColor; });
+
+  var html = BG_COLORS.map(function(c) {
+    return '<div class="color-swatch-wrap" onclick="selectColor(\'' + c.value + '\')">'
+      + '<div class="color-swatch' + (c.value === settings.bgColor ? ' selected' : '')
+      + '" data-color="' + c.value + '" style="background:' + c.value + ';"></div>'
+      + '<span class="swatch-label">' + c.label + '</span>'
+      + '</div>';
+  }).join('');
+
+  var customBg = isCustom ? settings.bgColor : '#FFF0E0';
+  html += '<div class="color-swatch-wrap">'
+    + '<div class="color-picker-outer">'
+    + '<div class="color-picker-face' + (isCustom ? ' selected' : '') + '" id="custom-picker-face"'
+    + (isCustom ? ' style="background:' + customBg + ';"' : '') + '>'
+    + '<input type="color" id="custom-color-input" value="' + customBg + '"'
+    + ' onchange="selectCustomColor(this.value)" oninput="selectCustomColor(this.value)"'
+    + ' title="Choose a custom color" />'
+    + (isCustom ? '' : '<span style="pointer-events:none;font-size:18px;">＋</span>')
+    + '</div></div>'
+    + '<span class="swatch-label">Custom</span>'
+    + '</div>';
+
+  grid.innerHTML = html;
+}
+
+function selectColor(value) {
+  settings.bgColor = value;
+  document.querySelectorAll('.color-swatch').forEach(function(el) {
+    el.classList.toggle('selected', el.dataset.color === value);
+  });
+  var face = document.getElementById('custom-picker-face');
+  if (face) face.classList.remove('selected');
+  updatePreview();
+}
+
+function selectCustomColor(value) {
+  settings.bgColor = value;
+  document.querySelectorAll('.color-swatch').forEach(function(el) { el.classList.remove('selected'); });
+  var face = document.getElementById('custom-picker-face');
+  if (face) {
+    face.classList.add('selected');
+    face.style.background = value;
+    var plus = face.querySelector('span');
+    if (plus) plus.style.display = 'none';
+  }
+  updatePreview();
+}
+
+// ── BANNER ───────────────────────────────────────────────────────────
+function buildBannerGrid() {
+  var grid = document.getElementById('banner-grid');
+  grid.innerHTML = BANNERS.map(function(b) {
+    var sel = b.value === settings.banner ? ' selected' : '';
+    if (!b.thumb) {
+      return '<div class="banner-option banner-none' + sel + '" data-banner="none" onclick="selectBanner(\'none\')">'
+        + '<div class="banner-thumb"><span class="banner-none-icon">—</span></div>'
+        + '<div class="banner-name">None</div></div>';
+    }
+    return '<div class="banner-option' + sel + '" data-banner="' + b.value + '" onclick="selectBanner(\'' + b.value + '\')">'
+      + '<div class="banner-thumb" style="background:' + b.thumb + ';"></div>'
+      + '<div class="banner-name">' + b.label + '</div></div>';
+  }).join('');
+}
+
+function selectBanner(value) {
+  settings.banner = value;
+  document.querySelectorAll('.banner-option').forEach(function(el) {
+    el.classList.toggle('selected', el.dataset.banner === value);
+  });
+  updatePreview();
+}
+
+// ── MINI CALENDAR ─────────────────────────────────────────────────────
+function buildCalendar() {
+  var now = new Date();
+  var year = now.getFullYear();
+  var month = now.getMonth();
+  var today = now.getDate();
+  var MONTH_NAMES = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
+  document.getElementById('mini-month-name').textContent = MONTH_NAMES[month] + ' ' + year;
+
+  var firstDow     = new Date(year, month, 1).getDay();
+  var daysInMonth  = new Date(year, month + 1, 0).getDate();
+  var daysInPrev   = new Date(year, month, 0).getDate();
+
+  function rng(day, slot) {
+    var seed = (year * 100 + month) * 100 + day;
+    return ((seed * 1664525 + slot * 1013904223) & 0x7fffffff) / 0x7fffffff;
+  }
+
+  var cols = PRIORITY_COLORS[settings.priorityScheme] || PRIORITY_COLORS.default;
+
+  // Day-of-week headers
+  var html = ['S','M','T','W','T','F','S'].map(function(d) {
+    return '<div class="mini-cal-head">' + d + '</div>';
+  }).join('');
+
+  // Prev-month trailing cells
+  for (var i = 0; i < firstDow; i++) {
+    html += '<div class="mini-cal-cell other-month"><div class="mini-cal-num">'
+      + (daysInPrev - firstDow + 1 + i) + '</div></div>';
+  }
+
+  // Current month cells
+  for (var day = 1; day <= daysInMonth; day++) {
+    var dots = '';
+    if (rng(day, 1) > 0.35) dots += '<div class="mini-cal-dot" data-p="a" style="background:' + cols.a + ';opacity:0.7;"></div>';
+    if (rng(day, 2) > 0.52) dots += '<div class="mini-cal-dot" data-p="b" style="background:' + cols.b + ';opacity:0.7;"></div>';
+    if (rng(day, 3) > 0.68) dots += '<div class="mini-cal-dot" data-p="c" style="background:' + cols.c + ';opacity:0.7;"></div>';
+    html += '<div class="mini-cal-cell' + (day === today ? ' today' : '') + '">'
+      + '<div class="mini-cal-num">' + day + '</div>'
+      + '<div class="mini-cal-dots">' + dots + '</div>'
+      + '</div>';
+  }
+
+  // Next-month leading cells
+  var totalCells = firstDow + daysInMonth;
+  var remainder  = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (var j = 1; j <= remainder; j++) {
+    html += '<div class="mini-cal-cell other-month"><div class="mini-cal-num">' + j + '</div></div>';
+  }
+
+  document.getElementById('mini-cal-grid').innerHTML = html;
+}
+
+// ── HABIT PIPS ────────────────────────────────────────────────────────
+function buildHabitPips() {
+  var patterns = [
+    [1,1,0,1,1,1,0,1,0,1],
+    [1,0,1,1,0,1,1,1,0,1]
+  ];
+  [1,2].forEach(function(i) {
+    var el = document.getElementById('habit-pips-' + i);
+    if (!el) return;
+    el.innerHTML = patterns[i-1].map(function(done) {
+      return '<div class="mini-habit-pip' + (done ? ' done' : '') + '"></div>';
+    }).join('');
+  });
+}
+
+// ── PROMPT RADIOS ────────────────────────────────────────────────────
+function bindPromptRadios() {
+  document.querySelectorAll('input[name="promptType"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      settings.promptType = this.value;
+      refreshPromptUI();
+      updatePreview();
+    });
+  });
+  document.getElementById('custom-prompt-input').addEventListener('input', function() {
+    settings.customPrompt = this.value;
+  });
+}
+
+function refreshPromptUI() {
+  var isCustom = settings.promptType === 'custom';
+  document.getElementById('radio-opt-default').classList.toggle('selected', !isCustom);
+  document.getElementById('radio-opt-custom').classList.toggle('selected', isCustom);
+  document.getElementById('custom-prompt-wrap').classList.toggle('visible', isCustom);
+}
+
+// ── SEGMENTED CONTROLS ───────────────────────────────────────────────
+function bindSegControls() {
+  bindSeg('font-control',         function(v) { settings.fontStyle      = v; updatePreview(); });
+  bindSeg('priority-control',     function(v) { settings.priorityScheme = v; buildCalendar(); updatePriorityDots(); });
+  bindSeg('content-type-control', function(v) { settings.contentType    = v; updatePreview(); });
+}
+
+function bindSeg(id, onChange) {
+  var ctrl = document.getElementById(id);
+  if (!ctrl) return;
+  ctrl.querySelectorAll('.seg-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      ctrl.querySelectorAll('.seg-btn').forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      onChange(this.dataset.val);
+    });
+  });
+}
+
+// ── TOGGLES ──────────────────────────────────────────────────────────
+function bindToggles() {
+  document.getElementById('toggle-goals').addEventListener('change', function() {
+    settings.showGoals = this.checked;
+    updatePreview();
+  });
+  document.getElementById('toggle-on-track').addEventListener('change', function() {
+    settings.showOnTrack = this.checked;
+    updatePreview();
+  });
+  document.getElementById('toggle-content').addEventListener('change', function() {
+    settings.showContent = this.checked;
+    document.getElementById('content-type-row').classList.toggle('visible', this.checked);
+    updatePreview();
+  });
+  document.getElementById('toggle-habits').addEventListener('change', function() {
+    settings.showHabits = this.checked;
+    updatePreview();
+  });
+}
+
+// ── APPLY SETTINGS TO FORM ───────────────────────────────────────────
+function applySettingsToForm() {
+  buildColorGrid();
+  buildBannerGrid();
+
+  var radio = document.querySelector('input[name="promptType"][value="' + settings.promptType + '"]');
+  if (radio) radio.checked = true;
+  refreshPromptUI();
+  document.getElementById('custom-prompt-input').value = settings.customPrompt || '';
+
+  setSeg('font-control',         settings.fontStyle);
+  setSeg('priority-control',     settings.priorityScheme);
+  setSeg('content-type-control', settings.contentType);
+
+  document.getElementById('toggle-goals').checked    = settings.showGoals;
+  document.getElementById('toggle-on-track').checked = settings.showOnTrack;
+  document.getElementById('toggle-content').checked  = settings.showContent;
+  document.getElementById('toggle-habits').checked   = settings.showHabits;
+  document.getElementById('content-type-row').classList.toggle('visible', settings.showContent);
+}
+
+function setSeg(id, val) {
+  var ctrl = document.getElementById(id);
+  if (!ctrl) return;
+  ctrl.querySelectorAll('.seg-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.val === val);
+  });
+}
+
+// ── COLLECT FROM FORM ────────────────────────────────────────────────
+function collectFromForm() {
+  var radio = document.querySelector('input[name="promptType"]:checked');
+  if (radio) settings.promptType = radio.value;
+  settings.customPrompt  = document.getElementById('custom-prompt-input').value;
+  settings.showGoals     = document.getElementById('toggle-goals').checked;
+  settings.showOnTrack   = document.getElementById('toggle-on-track').checked;
+  settings.showContent   = document.getElementById('toggle-content').checked;
+  settings.showHabits    = document.getElementById('toggle-habits').checked;
+}
+
+// ── UPDATE PRIORITY DOTS IN GOALS PREVIEW ────────────────────────────
+function updatePriorityDots() {
+  var cols = PRIORITY_COLORS[settings.priorityScheme] || PRIORITY_COLORS.default;
+  var ga = document.getElementById('gdot-a');
+  var gb = document.getElementById('gdot-b');
+  var gc = document.getElementById('gdot-c');
+  if (ga) ga.style.background = cols.a;
+  if (gb) gb.style.background = cols.b;
+  if (gc) gc.style.background = cols.c;
+}
+
+// ── LIVE PREVIEW ──────────────────────────────────────────────────────
+function updatePreview() {
+  var planner   = document.getElementById('mini-planner');
+  var banner    = document.getElementById('mini-banner');
+  var block     = document.getElementById('mini-content-block');
+  var goals     = document.getElementById('mini-goals');
+  var habits    = document.getElementById('mini-habits');
+
+  // Background + font
+  planner.style.background = settings.bgColor;
+  planner.style.fontFamily = FONT_STACKS[settings.fontStyle] || FONT_STACKS.default;
+
+  // Banner
+  var bannerData = null;
+  for (var i = 0; i < BANNERS.length; i++) {
+    if (BANNERS[i].value === settings.banner) { bannerData = BANNERS[i]; break; }
+  }
+  if (bannerData && bannerData.thumb) {
+    banner.style.background = bannerData.thumb;
+    banner.classList.add('visible');
+  } else {
+    banner.classList.remove('visible');
+  }
+
+  // Content block
+  if (settings.showContent) {
+    var sample = CONTENT_SAMPLES[settings.contentType] || CONTENT_SAMPLES.quote;
+    document.getElementById('mini-content-type-lbl').textContent  = sample.typeLabel;
+    document.getElementById('mini-content-text').textContent       = sample.text;
+    document.getElementById('mini-content-attr').textContent       = sample.attr;
+    block.style.borderLeftColor = sample.borderColor;
+    block.classList.add('visible');
+  } else {
+    block.classList.remove('visible');
+  }
+
+  // Priority dot colors
+  updatePriorityDots();
+
+  // Goals section visibility
+  goals.classList.toggle('hidden-section', !settings.showGoals);
+
+  // On Track badges
+  [1,2,3].forEach(function(n) {
+    var badge = document.getElementById('badge-' + n);
+    if (badge) badge.classList.toggle('hidden-badge', !settings.showOnTrack);
+  });
+
+  // Habit tracker visibility
+  habits.classList.toggle('hidden-section', !settings.showHabits);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+var _toastTimer;
+function showToast(msg, type) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className   = 'toast' + (type ? ' ' + type : '');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 2800);
+}
+</script>
+
+</body>
+</html>
