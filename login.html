@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZATY Planner — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --sky: #F0F5FA;
+    --white: #FFFFFF;
+    --ink: #1C1A17;
+    --ink-light: #6B6760;
+    --ink-faint: #B0ADA8;
+    --border: #D8E4F0;
+    --border-dark: #B8CAE0;
+    --accent: #4A6FA5;
+    --accent-hover: #3A5A90;
+    --accent-light: #E8F0F8;
+    --error-bg: #FFF3F0;
+    --error-text: #8B2500;
+    --error-border: #F5C4B8;
+    --success-bg: #F0FAF4;
+    --success-text: #1A6B3A;
+    --success-border: #A8DFC0;
+    --radius: 12px;
+    --shadow: 0 2px 8px rgba(74,111,165,0.10), 0 1px 3px rgba(28,26,23,0.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: var(--sky);
+    color: var(--ink);
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem 2rem;
+  }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .brand-name {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.01em;
+  }
+  .brand-sub {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--sky);
+    border-radius: 9px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    margin-bottom: 1.75rem;
+  }
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 8px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink-light);
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: 400;
+    transition: all 0.15s;
+  }
+  .tab-btn.active {
+    background: var(--white);
+    color: var(--ink);
+    font-weight: 500;
+    box-shadow: var(--shadow);
+  }
+
+  .form-group { margin-bottom: 1.1rem; }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-light);
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    width: 100%;
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    background: var(--sky);
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--white);
+  }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 0.5rem;
+  }
+  .submit-btn:hover { background: var(--accent-hover); }
+  .submit-btn:disabled { opacity: 0.6; cursor: default; }
+
+  .alert {
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 1.1rem;
+    display: none;
+  }
+  .alert.error { background: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); }
+  .alert.success { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+  .alert.show { display: block; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 1.5rem 0;
+    color: var(--ink-faint);
+    font-size: 12px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .home-link {
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 12px;
+    color: var(--ink-light);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .home-link:hover { color: var(--accent); }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="brand">
+    <div class="brand-name">ZATY Planner</div>
+    <div class="brand-sub">Daily Edition</div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+    <button type="button" class="tab-btn" id="tab-register" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <div id="alert-box" class="alert" role="alert"></div>
+
+  <!-- Login form -->
+  <form id="login-form" onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label for="login-email">Email address</label>
+      <input type="email" id="login-email" name="email" autocomplete="email" required placeholder="you@example.com" />
+    </div>
+    <div class="form-group">
+      <label for="login-password">Password</label>
+      <input type="password" id="login-password" name="password" autocomplete="current-password" required placeholder="••••••••" />
+    </div>
+    <button type="submit" class="submit-btn" id="login-btn">Sign In</button>
+  </form>
+
+  <!-- Register form (hidden initially) -->
+  <form id="register-form" style="display:none" onsubmit="handleRegister(event)">
+    <div class="form-group">
+      <label for="reg-name">Display name <span style="font-weight:300;color:var(--ink-faint)">(optional)</span></label>
+      <input type="text" id="reg-name" name="displayName" autocomplete="name" placeholder="Your name" />
+    </div>
+    <div class="form-group">
+      <label for="reg-email">Email address</label>
+      <input type="email" id="reg-email" name="email" autocomplete="email" required placeholder="you@example.com" />
+    </div>
+    <div class="form-group">
+      <label for="reg-password">Password <span style="font-weight:300;color:var(--ink-faint)">(min 8 characters)</span></label>
+      <input type="password" id="reg-password" name="password" autocomplete="new-password" required placeholder="••••••••" minlength="8" />
+    </div>
+    <button type="submit" class="submit-btn" id="register-btn">Create Account</button>
+  </form>
+</div>
+
+<a href="homepage.html" class="home-link">← Back to homepage</a>
+
+<script>
+(function () {
+  'use strict';
+
+  // Redirect if already logged in
+  fetch('/api/auth/me')
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.user) {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('next') === 'google') {
+          window.location.href = '/auth/google';
+        } else {
+          window.location.href = '/planner.html';
+        }
+      }
+    })
+    .catch(function () {
+      // Server not responding — show the form as-is
+    });
+
+  window.switchTab = function (tab) {
+    var isLogin = tab === 'login';
+    document.getElementById('login-form').style.display   = isLogin ? '' : 'none';
+    document.getElementById('register-form').style.display = isLogin ? 'none' : '';
+    document.getElementById('tab-login').classList.toggle('active', isLogin);
+    document.getElementById('tab-register').classList.toggle('active', !isLogin);
+    hideAlert();
+  };
+
+  function showAlert(type, message) {
+    var el = document.getElementById('alert-box');
+    el.className = 'alert ' + type + ' show';
+    el.textContent = message;
+  }
+
+  function hideAlert() {
+    var el = document.getElementById('alert-box');
+    el.className = 'alert';
+    el.textContent = '';
+  }
+
+  function setLoading(btnId, loading) {
+    var btn = document.getElementById(btnId);
+    if (loading) {
+      btn.disabled = true;
+      btn.dataset.originalText = btn.textContent;
+      btn.innerHTML = '<span class="spinner"></span>Please wait…';
+    } else {
+      btn.disabled = false;
+      btn.textContent = btn.dataset.originalText || btn.textContent;
+    }
+  }
+
+  window.handleLogin = function (e) {
+    e.preventDefault();
+    hideAlert();
+    setLoading('login-btn', true);
+
+    var email    = document.getElementById('login-email').value;
+    var password = document.getElementById('login-password').value;
+
+    fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password }),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, data: d }; }); })
+      .then(function (res) {
+        setLoading('login-btn', false);
+        if (res.status === 200) {
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('next') === 'google') {
+            window.location.href = '/auth/google';
+          } else {
+            window.location.href = '/planner.html';
+          }
+        } else {
+          showAlert('error', res.data.error || 'Login failed. Please try again.');
+        }
+      })
+      .catch(function () {
+        setLoading('login-btn', false);
+        showAlert('error', 'Could not connect to server. Is it running?');
+      });
+  };
+
+  window.handleRegister = function (e) {
+    e.preventDefault();
+    hideAlert();
+    setLoading('register-btn', true);
+
+    var email       = document.getElementById('reg-email').value;
+    var password    = document.getElementById('reg-password').value;
+    var displayName = document.getElementById('reg-name').value;
+
+    fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password, displayName: displayName }),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, data: d }; }); })
+      .then(function (res) {
+        setLoading('register-btn', false);
+        if (res.status === 201) {
+          window.location.href = '/planner.html';
+        } else {
+          showAlert('error', res.data.error || 'Registration failed. Please try again.');
+        }
+      })
+      .catch(function () {
+        setLoading('register-btn', false);
+        showAlert('error', 'Could not connect to server. Is it running?');
+      });
+  };
+
+})();
+</script>
+</body>
+</html>
