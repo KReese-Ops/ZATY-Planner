@@ -2,7 +2,7 @@
 
 const express = require('express');
 const { google } = require('googleapis');
-const { getDb } = require('../db/setup');
+const { query } = require('../db/pool');
 const { encrypt, decrypt } = require('../utils/crypto');
 const requireAuth = require('../middleware/requireAuth');
 
@@ -24,10 +24,11 @@ function getOAuthClient() {
  * Throws if the refresh token is invalid/revoked.
  */
 async function getAuthedClient(userId) {
-  const db = getDb();
-  const row = db
-    .prepare('SELECT * FROM user_calendar_tokens WHERE user_id = ?')
-    .get(userId);
+  const result = await query(
+    'SELECT * FROM user_calendar_tokens WHERE user_id = $1',
+    [userId]
+  );
+  const row = result.rows[0];
 
   if (!row) return null;
 
@@ -42,7 +43,6 @@ async function getAuthedClient(userId) {
     expiry_date: row.token_expiry ? new Date(row.token_expiry).getTime() : null,
   });
 
-  // Proactively refresh if the token is expired or within 5 minutes of expiry
   const expiryMs = row.token_expiry ? new Date(row.token_expiry).getTime() : 0;
   const nowMs = Date.now();
   const fiveMinutes = 5 * 60 * 1000;
@@ -56,19 +56,19 @@ async function getAuthedClient(userId) {
       const { credentials } = await oauth2Client.refreshAccessToken();
       oauth2Client.setCredentials(credentials);
 
-      // Persist the refreshed access token
-      db.prepare(`
-        UPDATE user_calendar_tokens
-        SET access_token_enc = ?,
-            token_expiry     = ?,
-            updated_at       = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')
-        WHERE user_id = ?
-      `).run(
-        encrypt(credentials.access_token),
-        credentials.expiry_date
-          ? new Date(credentials.expiry_date).toISOString()
-          : null,
-        userId
+      await query(
+        `UPDATE user_calendar_tokens
+         SET access_token_enc = $1,
+             token_expiry     = $2,
+             updated_at       = NOW()
+         WHERE user_id = $3`,
+        [
+          encrypt(credentials.access_token),
+          credentials.expiry_date
+            ? new Date(credentials.expiry_date).toISOString()
+            : null,
+          userId,
+        ]
       );
     } catch (refreshErr) {
       console.error('Token refresh failed for user', userId, refreshErr.message);
@@ -80,11 +80,6 @@ async function getAuthedClient(userId) {
 }
 
 // ── GET /api/calendar/events ──────────────────────────────────────────────────
-//
-// Query params:
-//   date  YYYY-MM-DD  (defaults to today)
-//
-// Returns events for the requested day (midnight-to-midnight local → UTC window).
 
 router.get('/events', requireAuth, async (req, res) => {
   const dateStr = (req.query.date || '').match(/^\d{4}-\d{2}-\d{2}$/)
@@ -95,6 +90,7 @@ router.get('/events', requireAuth, async (req, res) => {
   try {
     authClient = await getAuthedClient(req.userId);
   } catch (err) {
+    console.error('Auth client error for user', req.userId, err.message);
     if (err.message === 'token_refresh_failed') {
       return res.status(401).json({
         error: 'reconnect_required',
@@ -110,8 +106,6 @@ router.get('/events', requireAuth, async (req, res) => {
     return res.status(404).json({ error: 'no_calendar_connected' });
   }
 
-  // Build a UTC time window that covers the full requested local day.
-  // We extend by ±1 day to catch events that straddle midnight in any timezone.
   const [year, month, day] = dateStr.split('-').map(Number);
   const timeMin = new Date(Date.UTC(year, month - 1, day, 0, 0, 0)).toISOString();
   const timeMax = new Date(Date.UTC(year, month - 1, day + 1, 0, 0, 0)).toISOString();
@@ -147,10 +141,12 @@ router.get('/events', requireAuth, async (req, res) => {
 
 // ── POST /api/calendar/disconnect ────────────────────────────────────────────
 
-router.post('/disconnect', requireAuth, (req, res) => {
+router.post('/disconnect', requireAuth, async (req, res) => {
   try {
-    const db = getDb();
-    db.prepare('DELETE FROM user_calendar_tokens WHERE user_id = ?').run(req.userId);
+    await query(
+      'DELETE FROM user_calendar_tokens WHERE user_id = $1',
+      [req.userId]
+    );
     return res.json({ ok: true });
   } catch (err) {
     console.error('Disconnect error:', err);
