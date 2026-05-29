@@ -2,16 +2,25 @@
 
 require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL missing');
+}
+
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const connectPgSimple = require('connect-pg-simple');
 
+const { pool } = require('./db/pool');
 const { initDb } = require('./db/setup');
 const authRoutes = require('./routes/auth');
 const calendarRoutes = require('./routes/calendar');
 
 // ── Database ──────────────────────────────────────────────────────────────────
-initDb();
+initDb().catch((err) => {
+  console.error('Failed to initialise database:', err);
+  process.exit(1);
+});
 
 // ── App ───────────────────────────────────────────────────────────────────────
 const app = express();
@@ -21,13 +30,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // ── Sessions ──────────────────────────────────────────────────────────────────
-const SQLiteStore = require('connect-sqlite3')(session);
+const PgSession = connectPgSimple(session);
 
 app.use(
   session({
-    store: new SQLiteStore({
-      db: 'sessions.sqlite',
-      dir: path.join(__dirname, '../data'),
+    store: new PgSession({
+      pool,
+      tableName: 'session',
+      createTableIfMissing: true,
     }),
     secret: process.env.SESSION_SECRET || 'please-change-me-in-production',
     resave: false,
@@ -76,4 +86,10 @@ app.listen(PORT, () => {
       'Set a long random string in .env before deploying.'
     );
   }
+});
+
+// ── Graceful shutdown ─────────────────────────────────────────────────────────
+process.on('SIGTERM', async () => {
+  await pool.end();
+  process.exit(0);
 });

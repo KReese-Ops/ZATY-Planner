@@ -4,7 +4,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { google } = require('googleapis');
-const { getDb } = require('../db/setup');
+const { query } = require('../db/pool');
 const { encrypt, decrypt } = require('../utils/crypto');
 
 const router = express.Router();
@@ -43,22 +43,23 @@ router.post('/api/auth/register', async (req, res) => {
   }
 
   try {
-    const db = getDb();
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existing) {
+    const existing = await query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
       return res.status(409).json({ error: 'An account with that email already exists.' });
     }
 
     const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    const result = db
-      .prepare('INSERT INTO users (email, password_hash, display_name) VALUES (?, ?, ?)')
-      .run(email, hash, displayName);
+    const result = await query(
+      'INSERT INTO users (email, password_hash, display_name) VALUES ($1, $2, $3) RETURNING id',
+      [email, hash, displayName]
+    );
+    const id = result.rows[0].id;
 
-    req.session.userId = result.lastInsertRowid;
+    req.session.userId = id;
     req.session.userEmail = email;
 
     return res.status(201).json({
-      user: { id: result.lastInsertRowid, email, displayName },
+      user: { id, email, displayName },
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -77,8 +78,8 @@ router.post('/api/auth/login', async (req, res) => {
   }
 
   try {
-    const db = getDb();
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
@@ -115,25 +116,28 @@ router.post('/api/auth/logout', (req, res) => {
 
 // ── JSON API: Current user ─────────────────────────────────────────────────────
 
-router.get('/api/auth/me', (req, res) => {
+router.get('/api/auth/me', async (req, res) => {
   if (!req.session || !req.session.userId) {
     return res.json({ user: null });
   }
 
   try {
-    const db = getDb();
-    const user = db
-      .prepare('SELECT id, email, display_name FROM users WHERE id = ?')
-      .get(req.session.userId);
+    const userResult = await query(
+      'SELECT id, email, display_name FROM users WHERE id = $1',
+      [req.session.userId]
+    );
+    const user = userResult.rows[0];
 
     if (!user) {
       req.session.destroy(() => {});
       return res.json({ user: null });
     }
 
-    const token = db
-      .prepare('SELECT google_calendar_id FROM user_calendar_tokens WHERE user_id = ?')
-      .get(user.id);
+    const tokenResult = await query(
+      'SELECT google_calendar_id FROM user_calendar_tokens WHERE user_id = $1',
+      [user.id]
+    );
+    const token = tokenResult.rows[0];
 
     return res.json({
       user: {
@@ -154,7 +158,6 @@ router.get('/api/auth/me', (req, res) => {
 
 router.get('/auth/google', (req, res) => {
   if (!req.session || !req.session.userId) {
-    // Preserve the return URL so we can send user back after they log in
     return res.redirect('/login.html?next=google');
   }
 
@@ -165,7 +168,6 @@ router.get('/auth/google', (req, res) => {
     );
   }
 
-  // CSRF-protection state token stored in session
   const state = crypto.randomBytes(16).toString('hex');
   req.session.oauthState = state;
 
@@ -193,7 +195,6 @@ router.get('/auth/google/callback', async (req, res) => {
     return res.redirect('/planner.html?cal_error=' + encodeURIComponent(error));
   }
 
-  // Validate CSRF state
   if (!state || state !== req.session.oauthState) {
     return res.redirect('/planner.html?cal_error=invalid_state');
   }
@@ -209,32 +210,31 @@ router.get('/auth/google/callback', async (req, res) => {
 
     oauth2Client.setCredentials(tokens);
 
-    // Fetch the user's Google email to use as calendar ID
     const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
     const { data: googleUser } = await oauth2.userinfo.get();
     const calendarId = googleUser.email;
 
-    const db = getDb();
     const now = new Date().toISOString();
 
-    db.prepare(`
-      INSERT INTO user_calendar_tokens
+    await query(
+      `INSERT INTO user_calendar_tokens
         (user_id, google_calendar_id, access_token_enc, refresh_token_enc, token_expiry, connected_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(user_id) DO UPDATE SET
-        google_calendar_id  = excluded.google_calendar_id,
-        access_token_enc    = excluded.access_token_enc,
-        refresh_token_enc   = COALESCE(excluded.refresh_token_enc, refresh_token_enc),
-        token_expiry        = excluded.token_expiry,
-        updated_at          = excluded.updated_at
-    `).run(
-      req.session.userId,
-      calendarId,
-      encrypt(tokens.access_token),
-      tokens.refresh_token ? encrypt(tokens.refresh_token) : null,
-      tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
-      now,
-      now
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (user_id) DO UPDATE SET
+         google_calendar_id = EXCLUDED.google_calendar_id,
+         access_token_enc   = EXCLUDED.access_token_enc,
+         refresh_token_enc  = COALESCE(EXCLUDED.refresh_token_enc, user_calendar_tokens.refresh_token_enc),
+         token_expiry       = EXCLUDED.token_expiry,
+         updated_at         = EXCLUDED.updated_at`,
+      [
+        req.session.userId,
+        calendarId,
+        encrypt(tokens.access_token),
+        tokens.refresh_token ? encrypt(tokens.refresh_token) : null,
+        tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
+        now,
+        now,
+      ]
     );
 
     return res.redirect('/planner.html?cal_connected=1');
