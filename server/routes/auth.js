@@ -158,7 +158,7 @@ router.get('/api/auth/me', async (req, res) => {
 
 router.get('/auth/google', (req, res) => {
   if (!req.session || !req.session.userId) {
-    return res.redirect('/login.html?next=google');
+    return res.redirect('https://kreese-ops.github.io/ZATY-Planner/login.html?next=google');
   }
 
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
@@ -192,16 +192,16 @@ router.get('/auth/google/callback', async (req, res) => {
 
   if (error) {
     console.error('Google OAuth error:', error);
-    return res.redirect('/planner.html?cal_error=' + encodeURIComponent(error));
+    return res.redirect('https://kreese-ops.github.io/ZATY-Planner/planner.html?cal_error=' + encodeURIComponent(error));
   }
 
   if (!state || state !== req.session.oauthState) {
-    return res.redirect('/planner.html?cal_error=invalid_state');
+    return res.redirect('https://kreese-ops.github.io/ZATY-Planner/planner.html?cal_error=invalid_state');
   }
   delete req.session.oauthState;
 
   if (!req.session.userId) {
-    return res.redirect('/login.html?next=google');
+    return res.redirect('https://kreese-ops.github.io/ZATY-Planner/login.html?next=google');
   }
 
   try {
@@ -237,10 +237,10 @@ router.get('/auth/google/callback', async (req, res) => {
       ]
     );
 
-    return res.redirect('/planner.html?cal_connected=1');
+    return res.redirect('https://kreese-ops.github.io/ZATY-Planner/planner.html?cal_connected=1');
   } catch (err) {
     console.error('OAuth callback error:', err);
-    return res.redirect('/planner.html?cal_error=token_exchange_failed');
+    return res.redirect('https://kreese-ops.github.io/ZATY-Planner/planner.html?cal_error=token_exchange_failed');
   }
 });
 

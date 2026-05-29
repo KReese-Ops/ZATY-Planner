@@ -10,6 +10,7 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const connectPgSimple = require('connect-pg-simple');
+const cors = require('cors');
 
 const { pool } = require('./db/pool');
 const { initDb } = require('./db/setup');
@@ -29,6 +30,13 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use(cors({
+  origin: 'https://kreese-ops.github.io',
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+}));
+
 // ── Sessions ──────────────────────────────────────────────────────────────────
 const PgSession = connectPgSimple(session);
 
@@ -42,10 +50,11 @@ app.use(
     secret: process.env.SESSION_SECRET || 'please-change-me-in-production',
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   })
